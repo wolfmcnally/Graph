@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: Equatable
+public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: Equatable, JSONCodable
 where NodeID: ElementID, EdgeID: ElementID, NodeData: ElementData, EdgeData: ElementData
 {
     struct Node: Equatable {
@@ -51,170 +51,156 @@ extension Graph: ViewableGraph {
         Array(_edges.keys).sorted()
     }
     
-    public func hasNode(_ nodeID: NodeID) -> Bool {
-        _nodes[nodeID] != nil
+    public func hasNode(_ node: NodeID) -> Bool {
+        _nodes[node] != nil
     }
     
-    public func hasNoNode(_ nodeID: NodeID) -> Bool {
-        !hasNode(nodeID)
+    public func hasNoNode(_ node: NodeID) -> Bool {
+        !hasNode(node)
     }
     
-    public func hasEdge(_ edgeID: EdgeID) -> Bool {
-        _edges[edgeID] != nil
+    public func hasEdge(_ edge: EdgeID) -> Bool {
+        _edges[edge] != nil
     }
     
-    public func hasNoEdge(_ edgeID: EdgeID) -> Bool {
-        !hasEdge(edgeID)
+    public func hasNoEdge(_ edge: EdgeID) -> Bool {
+        !hasEdge(edge)
     }
 
-    public func nodeData(_ nodeID: NodeID) throws -> NodeData {
-        try node(nodeID).data
+    public func nodeData(_ node: NodeID) throws -> NodeData {
+        try getNode(node).data
     }
     
-    public func edgeData(_ edgeID: EdgeID) throws -> EdgeData {
-        try edge(edgeID).data
+    public func edgeData(_ edge: EdgeID) throws -> EdgeData {
+        try getEdge(edge).data
     }
 
-    public func nodeOutEdges(_ nodeID: NodeID) throws -> [EdgeID] {
-        try node(nodeID).outEdges.sorted()
+    public func nodeOutEdges(_ node: NodeID) throws -> [EdgeID] {
+        try getNode(node).outEdges.sorted()
     }
     
-    public func nodeInEdges(_ nodeID: NodeID) throws -> [EdgeID] {
-        try node(nodeID).inEdges.sorted()
+    public func nodeInEdges(_ node: NodeID) throws -> [EdgeID] {
+        try getNode(node).inEdges.sorted()
     }
     
-    public func nodeEdges(_ nodeID: NodeID) throws -> [EdgeID] {
-        try Array(Set(nodeOutEdges(nodeID)).union(Set(nodeInEdges(nodeID)))).sorted()
+    public func nodeEdges(_ node: NodeID) throws -> [EdgeID] {
+        try Array(Set(nodeOutEdges(node)).union(Set(nodeInEdges(node)))).sorted()
     }
     
-    public func nodeSuccessors(_ nodeID: NodeID) throws -> [NodeID] {
-        try nodeOutEdges(nodeID).map(edgeHead).sorted()
+    public func nodeSuccessors(_ node: NodeID) throws -> [NodeID] {
+        try nodeOutEdges(node).map(edgeHead).sorted()
     }
     
-    public func nodePredecessors(_ nodeID: NodeID) throws -> [NodeID] {
-        try nodeInEdges(nodeID).map(edgeTail).sorted()
+    public func nodePredecessors(_ node: NodeID) throws -> [NodeID] {
+        try nodeInEdges(node).map(edgeTail).sorted()
     }
     
-    public func nodeNeighbors(_ nodeID: NodeID) throws -> [NodeID] {
-        let successors = try nodeSuccessors(nodeID)
-        let predececessors = try nodePredecessors(nodeID)
+    public func nodeNeighbors(_ node: NodeID) throws -> [NodeID] {
+        let successors = try nodeSuccessors(node)
+        let predececessors = try nodePredecessors(node)
         return Array(Set(successors).union(Set(predececessors))).sorted()
     }
     
-    public func edgeHead(_ edgeID: EdgeID) throws -> NodeID {
-        try edge(edgeID).head
+    public func edgeHead(_ edge: EdgeID) throws -> NodeID {
+        try getEdge(edge).head
     }
 
-    public func edgeTail(_ edgeID: EdgeID) throws -> NodeID {
-        try edge(edgeID).tail
+    public func edgeTail(_ edge: EdgeID) throws -> NodeID {
+        try getEdge(edge).tail
     }
 }
 
 extension Graph: EditableGraph {
-    public func withNodeData(_ nodeID: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
-        try checkHasNode(nodeID)
+    public func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
+        try checkHasNode(node)
         var copy = self
-        transform(&copy._nodes[nodeID]!.data)
+        transform(&copy._nodes[node]!.data)
         return copy
     }
 
-    public func setNodeData(_ nodeID: NodeID, data: NodeData) throws -> Self {
-        try withNodeData(nodeID) {
+    public func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
+        try checkHasEdge(edge)
+        var copy = self
+        transform(&copy._edges[edge]!.data)
+        return copy
+    }
+
+    public func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self {
+        try withEdgeData(edge) {
             $0 = data
         }
     }
 
-    public func withEdgeData(_ edgeID: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
-        try checkHasEdge(edgeID)
+    public func newNode(_ node: NodeID, data: NodeData) throws -> Self {
+        try checkHasNoNode(node)
         var copy = self
-        transform(&copy._edges[edgeID]!.data)
+        copy._nodes[node] = Node(data: data)
         return copy
     }
 
-    public func setEdgeData(_ edgeID: EdgeID, data: EdgeData) throws -> Self {
-        try withEdgeData(edgeID) {
-            $0 = data
-        }
-    }
-
-    public func newNode(_ nodeID: NodeID, data: NodeData) throws -> Self {
-        try checkHasNoNode(nodeID)
-        var copy = self
-        copy._nodes[nodeID] = Node(data: data)
+    public func removeNode(_ node: NodeID) throws -> Self {
+        var copy = try removeNodeEdges(node)
+        copy._nodes.removeValue(forKey: node)
         return copy
     }
 
-    public func newNode(_ nodeID: NodeID) throws -> Self {
-        try newNode(nodeID, data: NodeData())
-    }
-
-    public func removeNode(_ nodeID: NodeID) throws -> Self {
-        var copy = try removeNodeEdges(nodeID)
-        copy._nodes.removeValue(forKey: nodeID)
-        return copy
-    }
-
-    public func newEdge(_ edgeID: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
-        try checkHasNoEdge(edgeID)
+    public func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
+        try checkHasNoEdge(edge)
         try checkHasNode(tail)
         try checkHasNode(head)
         
         var copy = self
-        copy._edges[edgeID] = Edge(tail: tail, head: head, data: data)
-        copy._nodes[tail]!.outEdges.insert(edgeID)
-        copy._nodes[head]!.inEdges.insert(edgeID)
+        copy._edges[edge] = Edge(tail: tail, head: head, data: data)
+        copy._nodes[tail]!.outEdges.insert(edge)
+        copy._nodes[head]!.inEdges.insert(edge)
         return copy
     }
 
-    public func newEdge(_ edgeID: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
-        try newEdge(edgeID, tail: tail, head: head, data: EdgeData())
-    }
-
-    public func removeEdge(_ edgeID: EdgeID) throws -> Self {
-        let edge = try edge(edgeID)
+    public func removeEdge(_ edge: EdgeID) throws -> Self {
+        let e = try getEdge(edge)
         var copy = self
-        copy._nodes[edge.tail]!.outEdges.remove(edgeID)
-        copy._nodes[edge.head]!.inEdges.remove(edgeID)
-        copy._edges.removeValue(forKey: edgeID)
+        copy._nodes[e.tail]!.outEdges.remove(edge)
+        copy._nodes[e.head]!.inEdges.remove(edge)
+        copy._edges.removeValue(forKey: edge)
         return copy
     }
 
-    public func removeNodeEdges(_ nodeID: NodeID) throws -> Self {
+    public func removeNodeEdges(_ node: NodeID) throws -> Self {
         var copy = self
-        try nodeEdges(nodeID).forEach {
+        try nodeEdges(node).forEach {
             copy = try! copy.removeEdge($0)
         }
         return copy
     }
     
-    public func moveEdge(_ edgeID: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
+    public func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
         try checkHasNode(newTail)
         try checkHasNode(newHead)
-        var edge = try edge(edgeID)
-        let oldTail = edge.tail
-        let oldHead = edge.head
+        var e = try getEdge(edge)
+        let oldTail = e.tail
+        let oldHead = e.head
         guard oldTail != newTail || oldHead != newHead else {
             return self
         }
-        edge.tail = newTail
-        edge.head = newHead
+        e.tail = newTail
+        e.head = newHead
         var copy = self
-        copy._edges[edgeID] = edge
+        copy._edges[edge] = e
 
         if oldTail != newTail {
             try copy.withNode(newTail) { node in
-                node.outEdges.insert(edgeID)
+                node.outEdges.insert(edge)
             }
             try copy.withNode(oldTail) { node in
-                node.outEdges.remove(edgeID)
+                node.outEdges.remove(edge)
             }
         }
         if oldHead != newHead {
             try copy.withNode(newHead) { node in
-                node.inEdges.insert(edgeID)
+                node.inEdges.insert(edge)
             }
             try copy.withNode(oldHead) { node in
-                node.inEdges.remove(edgeID)
+                node.inEdges.remove(edge)
             }
         }
         return copy
@@ -222,49 +208,49 @@ extension Graph: EditableGraph {
 }
 
 private extension Graph {
-    func checkHasNode(_ nodeID: NodeID) throws {
-        guard hasNode(nodeID) else {
+    func checkHasNode(_ node: NodeID) throws {
+        guard hasNode(node) else {
             throw Error.notFound
         }
     }
     
-    func checkHasNoNode(_ nodeID: NodeID) throws {
-        guard hasNoNode(nodeID) else {
+    func checkHasNoNode(_ node: NodeID) throws {
+        guard hasNoNode(node) else {
             throw Error.duplicate
         }
     }
 
-    func checkHasEdge(_ edgeID: EdgeID) throws {
-        guard hasEdge(edgeID) else {
+    func checkHasEdge(_ edge: EdgeID) throws {
+        guard hasEdge(edge) else {
             throw Error.notFound
         }
     }
 
-    func checkHasNoEdge(_ edgeID: EdgeID) throws {
-        guard hasNoEdge(edgeID) else {
+    func checkHasNoEdge(_ edge: EdgeID) throws {
+        guard hasNoEdge(edge) else {
             throw Error.duplicate
         }
     }
 
-    func node(_ nodeID: NodeID) throws -> Node {
-        guard let result = _nodes[nodeID] else {
+    func getNode(_ node: NodeID) throws -> Node {
+        guard let result = _nodes[node] else {
             throw Error.notFound
         }
         return result
     }
     
-    func edge(_ edgeID: EdgeID) throws -> Edge {
-        guard let result = _edges[edgeID] else {
+    func getEdge(_ edge: EdgeID) throws -> Edge {
+        guard let result = _edges[edge] else {
             throw Error.notFound
         }
         return result
     }
     
-    mutating func withNode(_ nodeID: NodeID, transform: (inout Node) throws -> Void) throws {
-        try transform(&_nodes[nodeID]!)
+    mutating func withNode(_ node: NodeID, transform: (inout Node) throws -> Void) throws {
+        try transform(&_nodes[node]!)
     }
     
-    mutating func withEdge(_ edgeID: EdgeID, transform: (inout Edge) throws -> Void) throws {
-        try transform(&_edges[edgeID]!)
+    mutating func withEdge(_ edge: EdgeID, transform: (inout Edge) throws -> Void) throws {
+        try transform(&_edges[edge]!)
     }
 }

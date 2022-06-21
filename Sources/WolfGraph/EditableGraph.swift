@@ -1,16 +1,76 @@
 import Foundation
 
-public protocol EditableGraph: ViewableGraph {
-    func withNodeData(_ nodeID: NodeID, transform: (inout NodeData) -> Void) throws -> Self
-    func setNodeData(_ nodeID: NodeID, data: NodeData) throws -> Self
-    func withEdgeData(_ edgeID: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
-    func setEdgeData(_ edgeID: EdgeID, data: EdgeData) throws -> Self
-    func newNode(_ nodeID: NodeID, data: NodeData) throws -> Self
-    func newNode(_ nodeID: NodeID) throws -> Self
-    func removeNode(_ nodeID: NodeID) throws -> Self
-    func newEdge(_ edgeID: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self
-    func newEdge(_ edgeID: EdgeID, tail: NodeID, head: NodeID) throws -> Self
-    func removeEdge(_ edgeID: EdgeID) throws -> Self
-    func removeNodeEdges(_ nodeID: NodeID) throws -> Self
-    func moveEdge(_ edgeID: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self
+public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
+    init(_ innerGraph: InnerGraph)
+
+    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self
+    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
+    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
+    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self
+    func newNode(_ node: NodeID, data: NodeData) throws -> Self
+    func removeNode(_ node: NodeID) throws -> Self
+    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self
+    func removeEdge(_ edge: EdgeID) throws -> Self
+    func removeNodeEdges(_ node: NodeID) throws -> Self
+    func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self
+}
+
+public extension EditableGraph {
+    init(_ innerGraph: Self) {
+        fatalError("Only adaptors have inner graphs.")
+    }
+
+    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
+        try Self(innerGraph.withNodeData(node, transform: transform))
+    }
+
+    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
+        try Self(innerGraph.withEdgeData(edge, transform: transform))
+    }
+
+    func newNode(_ node: NodeID, data: NodeData) throws -> Self {
+        try Self(innerGraph.newNode(node, data: data))
+    }
+
+    func newNode(_ node: NodeID) throws -> Self {
+        try newNode(node, data: NodeData())
+    }
+
+    func removeNode(_ node: NodeID) throws -> Self {
+        try Self(innerGraph.removeNode(node))
+    }
+
+    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
+        try Self(innerGraph.newEdge(edge, tail: tail, head: head, data: data))
+    }
+
+    func removeEdge(_ edge: EdgeID) throws -> Self {
+        try Self(innerGraph.removeEdge(edge))
+    }
+
+    func removeNodeEdges(_ node: NodeID) throws -> Self {
+        try Self(innerGraph.removeNodeEdges(node))
+    }
+    
+    func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
+        try Self(innerGraph.moveEdge(edge, newTail: newTail, newHead: newHead))
+    }
+}
+
+public extension EditableGraph {
+    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self {
+        try withNodeData(node) {
+            $0 = data
+        }
+    }
+    
+    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self {
+        try withEdgeData(edge) {
+            $0 = data
+        }
+    }
+
+    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
+        try newEdge(edge, tail: tail, head: head, data: EdgeData())
+    }
 }

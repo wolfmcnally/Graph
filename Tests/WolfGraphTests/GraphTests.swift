@@ -34,35 +34,18 @@ final class GraphTests: XCTestCase {
         XCTAssertEqual(graph2.json, json)
     }
     
-    func testTestGraph() {
-        let graph = TestGraph.makeTree()
+    func testTestGraph1() throws {
+        let graph = try TestGraph()
+            .newNode("A")
+            .newNode("B")
+            .newNode("C")
+            .newEdge("AB", tail: "A", head: "B", data: "")
+            .newEdge("AC", tail: "A", head: "C", data: "")
         print(graph.json)
     }
     
-    func testDot() throws {
-        var graph = TestGraph.makeDAG()
-        graph = try graph
-            .newNode("Z")
-            .newEdge("AZ", tail: "A", head: "Z", data: .init(label: "AZ"))
-            .withNodeData("Z")
-        {
-            $0.label = "Zebra"
-            $0.shape = "pentagon"
-        }
-        .withNodeData("A") {
-            $0.color = "red"
-        }
-        .withNodeData("J") {
-            $0.style = "filled"
-        }
-        .withEdgeData("AZ") {
-            $0.label = "Green"
-            $0.color = "green"
-        }
-        .withEdgeData("JA") {
-            $0.style = "bold"
-        }
-        
-        print(graph.dotFormat)
+    func testTestGraph() {
+        let graph = TestGraph.makeTree()
+        print(graph.json)
     }
 }

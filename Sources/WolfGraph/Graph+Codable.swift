@@ -1,14 +1,6 @@
 import Foundation
 import WolfBase
 
-fileprivate let jsonEncoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .sortedKeys
-    return encoder
-}()
-
-fileprivate let jsonDecoder = JSONDecoder()
-
 extension Graph: Codable {
     enum CodingKeys: CodingKey {
         case nodes
@@ -85,13 +77,5 @@ extension Graph: Codable {
             graph = try graph.newEdge($0.key, tail: edge.tail, head: edge.head, data: edge.data)
         }
         self = graph
-    }
-    
-    public var json: String {
-        try! jsonEncoder.encode(self).utf8!
-    }
-    
-    public init(json: String) throws {
-        self = try jsonDecoder.decode(Self.self, from: json.utf8Data)
     }
 }

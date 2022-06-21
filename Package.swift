@@ -11,7 +11,7 @@ let package = Package(
             targets: ["WolfGraph"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0"))
+        .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0")),
     ],
     targets: [
         .target(
