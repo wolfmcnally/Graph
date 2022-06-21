@@ -1,5 +1,6 @@
 import Foundation
 
-public protocol DefaultConstructable {
-    init()
+public protocol ElementData: Hashable, Codable, DefaultConstructable {
 }
+
+extension String: ElementData { }

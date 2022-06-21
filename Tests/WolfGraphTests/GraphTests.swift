@@ -3,25 +3,66 @@ import WolfGraph
 
 final class GraphTests: XCTestCase {
     func test1() throws {
-        let graph = try Graph<Int, Int, String, String>()
-            .newNode(1, "A")
-            .newNode(2, "B")
-            .newNode(3, "C")
-            .newNode(4, "D")
-            .newEdge(5, 1, 2, "AB")
-            .newEdge(6, 1, 3, "AC")
-        XCTAssertEqual(graph.json, #"{"edges":{"5":[1,2,"AB"],"6":[1,3,"AC"]},"nodes":{"1":"A","2":"B","3":"C","4":"D"}}"#)
+        typealias MyGraph = Graph<Int, Int, String, String>
+        let graph = try MyGraph()
+            .newNode(101, data: "A")
+            .newNode(102, data: "B")
+            .newNode(103, data: "C")
+            .newNode(104, data: "D")
+            .newEdge(1, tail: 101, head: 102, data: "AB")
+            .newEdge(2, tail: 101, head: 103, data: "AC")
+        let json = #"{"edges":{"1":[101,102,"AB"],"2":[101,103,"AC"]},"nodes":{"101":"A","102":"B","103":"C","104":"D"}}"#
+        XCTAssertEqual(graph.json, json)
+        let graph2 = try MyGraph(json: json)
+        XCTAssertEqual(graph, graph2)
+        XCTAssertEqual(graph2.json, json)
     }
 
     func test2() throws {
-        let graph = try Graph<Int, Int, Void, Void>()
-            .newNode(1)
-            .newNode(2)
-            .newNode(3)
-            .newNode(4)
-            .newEdge(5, 1, 2)
-            .newEdge(6, 1, 3)
-            .newNode(7)
-        XCTAssertEqual(graph.json, #"{"edges":{"5":[1,2],"6":[1,3]},"nodes":[4,7]}"#)
+        typealias MyGraph = Graph<Int, Int, String, String>
+        let graph = try MyGraph()
+            .newNode(101)
+            .newNode(102)
+            .newNode(103)
+            .newNode(104)
+            .newEdge(1, tail: 101, head: 102)
+            .newEdge(2, tail: 101, head: 103)
+        let json = #"{"edges":{"1":[101,102,""],"2":[101,103,""]},"nodes":{"101":"","102":"","103":"","104":""}}"#
+        XCTAssertEqual(graph.json, json)
+        let graph2 = try MyGraph(json: json)
+        XCTAssertEqual(graph, graph2)
+        XCTAssertEqual(graph2.json, json)
+    }
+    
+    func testTestGraph() {
+        let graph = TestGraph.makeTree()
+        print(graph.json)
+    }
+    
+    func testDot() throws {
+        var graph = TestGraph.makeDAG()
+        graph = try graph
+            .newNode("Z")
+            .newEdge("AZ", tail: "A", head: "Z", data: .init(label: "AZ"))
+            .withNodeData("Z")
+        {
+            $0.label = "Zebra"
+            $0.shape = "pentagon"
+        }
+        .withNodeData("A") {
+            $0.color = "red"
+        }
+        .withNodeData("J") {
+            $0.style = "filled"
+        }
+        .withEdgeData("AZ") {
+            $0.label = "Green"
+            $0.color = "green"
+        }
+        .withEdgeData("JA") {
+            $0.style = "bold"
+        }
+        
+        print(graph.dotFormat)
     }
 }

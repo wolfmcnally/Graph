@@ -11,11 +11,12 @@ let package = Package(
             targets: ["WolfGraph"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0"))
     ],
     targets: [
         .target(
             name: "WolfGraph",
-            dependencies: []),
+            dependencies: ["WolfBase"]),
         .testTarget(
             name: "WolfGraphTests",
             dependencies: ["WolfGraph"]),
