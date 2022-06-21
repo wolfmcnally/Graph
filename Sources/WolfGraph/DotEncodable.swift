@@ -1,25 +1,25 @@
 import Foundation
 
 public protocol DotEncodable: ViewableGraph {
-    func nodeLabel(_ node: NodeID) -> String?
-    func nodeColor(_ node: NodeID) -> String?
-    func nodeStyle(_ node: NodeID) -> String?
-    func nodeShape(_ node: NodeID) -> String?
+    func dotNodeLabel(_ node: NodeID) -> String?
+    func dotNodeColor(_ node: NodeID) -> String?
+    func dotNodeStyle(_ node: NodeID) -> String?
+    func dotNodeShape(_ node: NodeID) -> String?
 
-    func edgeLabel(_ edge: EdgeID) -> String?
-    func edgeColor(_ edge: EdgeID) -> String?
-    func edgeStyle(_ edge: EdgeID) -> String?
+    func dotEdgeLabel(_ edge: EdgeID) -> String?
+    func dotEdgeColor(_ edge: EdgeID) -> String?
+    func dotEdgeStyle(_ edge: EdgeID) -> String?
 }
 
 public extension DotEncodable {
-    func nodeLabel(_ node: NodeID) -> String? { nil }
-    func nodeColor(_ node: NodeID) -> String? { nil }
-    func nodeStyle(_ node: NodeID) -> String? { nil }
-    func nodeShape(_ node: NodeID) -> String? { nil }
+    func dotNodeLabel(_ node: NodeID) -> String? { nil }
+    func dotNodeColor(_ node: NodeID) -> String? { nil }
+    func dotNodeStyle(_ node: NodeID) -> String? { nil }
+    func dotNodeShape(_ node: NodeID) -> String? { nil }
 
-    func edgeLabel(_ edge: EdgeID) -> String? { nil }
-    func edgeColor(_ edge: EdgeID) -> String? { nil }
-    func edgeStyle(_ edge: EdgeID) -> String? { nil }
+    func dotEdgeLabel(_ edge: EdgeID) -> String? { nil }
+    func dotEdgeColor(_ edge: EdgeID) -> String? { nil }
+    func dotEdgeStyle(_ edge: EdgeID) -> String? { nil }
 }
 
 public extension DotEncodable {
@@ -37,16 +37,16 @@ public extension DotEncodable {
         for node in nodes {
             var line: [String] = ["\t"]
             line.append(node.description)
-            if let label = nodeLabel(node) {
+            if let label = dotNodeLabel(node) {
                 line.append(attribute(name: "label", value: label))
             }
-            if let color = nodeColor(node) {
+            if let color = dotNodeColor(node) {
                 line.append(attribute(name: "color", value: color))
             }
-            if let style = nodeStyle(node) {
+            if let style = dotNodeStyle(node) {
                 line.append(attribute(name: "style", value: style))
             }
-            if let shape = nodeShape(node) {
+            if let shape = dotNodeShape(node) {
                 line.append(attribute(name: "shape", value: shape))
             }
             line.append(";")
@@ -58,13 +58,13 @@ public extension DotEncodable {
             try! line.append(edgeTail(edge).description)
             line.append(" -> ")
             try! line.append(edgeHead(edge).description)
-            if let label = edgeLabel(edge) {
+            if let label = dotEdgeLabel(edge) {
                 line.append(attribute(name: "label", value: label))
             }
-            if let color = edgeColor(edge) {
+            if let color = dotEdgeColor(edge) {
                 line.append(attribute(name: "color", value: color))
             }
-            if let style = edgeStyle(edge) {
+            if let style = dotEdgeStyle(edge) {
                 line.append(attribute(name: "style", value: style))
             }
             line.append(";")

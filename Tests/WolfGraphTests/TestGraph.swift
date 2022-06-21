@@ -305,32 +305,32 @@ extension TestGraph: EditableGraph {
 }
 
 extension TestGraph: DotEncodable {
-    func nodeLabel(_ node: NodeID) -> String? {
+    func dotNodeLabel(_ node: NodeID) -> String? {
         try! nodeData(node).label
     }
     
-    func nodeColor(_ node: NodeID) -> String? {
+    func dotNodeColor(_ node: NodeID) -> String? {
         try! nodeData(node).color
     }
     
-    func nodeStyle(_ node: NodeID) -> String? {
+    func dotNodeStyle(_ node: NodeID) -> String? {
         try! nodeData(node).style
     }
     
-    func nodeShape(_ node: NodeID) -> String? {
+    func dotNodeShape(_ node: NodeID) -> String? {
         try! nodeData(node).shape
     }
 
     
-    func edgeLabel(_ edge: EdgeID) -> String? {
+    func dotEdgeLabel(_ edge: EdgeID) -> String? {
         try! edgeData(edge).label
     }
     
-    func edgeColor(_ edge: EdgeID) -> String? {
+    func dotEdgeColor(_ edge: EdgeID) -> String? {
         try! edgeData(edge).color
     }
     
-    func edgeStyle(_ edge: EdgeID) -> String? {
+    func dotEdgeStyle(_ edge: EdgeID) -> String? {
         try! edgeData(edge).style
     }
 }
