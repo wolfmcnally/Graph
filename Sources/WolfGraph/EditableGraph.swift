@@ -16,10 +16,6 @@ public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
 }
 
 public extension EditableGraph {
-//    func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
-//        fatalError("Only adapters have inner graphs.")
-//    }
-
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
         try copySettingInnerGraph(innerGraph.withNodeData(node, transform: transform))
     }
