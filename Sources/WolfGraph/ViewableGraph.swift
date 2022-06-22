@@ -40,7 +40,7 @@ public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.Edge
 
 public extension ViewableGraph {
     var innerGraph: Self {
-        fatalError("Only adapters have inner graphs.")
+        self
     }
 
     var isEmpty: Bool {

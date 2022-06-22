@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
-    init(_ innerGraph: InnerGraph)
-
+    func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self
+    
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self
     func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
     func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
@@ -16,44 +16,44 @@ public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
 }
 
 public extension EditableGraph {
-    init(_ innerGraph: Self) {
-        fatalError("Only adaptors have inner graphs.")
-    }
+//    func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
+//        fatalError("Only adapters have inner graphs.")
+//    }
 
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
-        try Self(innerGraph.withNodeData(node, transform: transform))
+        try copySettingInnerGraph(innerGraph.withNodeData(node, transform: transform))
     }
 
     func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
-        try Self(innerGraph.withEdgeData(edge, transform: transform))
+        try copySettingInnerGraph(innerGraph.withEdgeData(edge, transform: transform))
     }
 
     func newNode(_ node: NodeID, data: NodeData) throws -> Self {
-        try Self(innerGraph.newNode(node, data: data))
+        try copySettingInnerGraph(innerGraph.newNode(node, data: data))
     }
 
     func newNode(_ node: NodeID) throws -> Self {
-        try newNode(node, data: NodeData())
+        try copySettingInnerGraph(innerGraph.newNode(node, data: NodeData()))
     }
 
     func removeNode(_ node: NodeID) throws -> Self {
-        try Self(innerGraph.removeNode(node))
+        try copySettingInnerGraph(innerGraph.removeNode(node))
     }
 
     func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
-        try Self(innerGraph.newEdge(edge, tail: tail, head: head, data: data))
+        try copySettingInnerGraph(innerGraph.newEdge(edge, tail: tail, head: head, data: data))
     }
 
     func removeEdge(_ edge: EdgeID) throws -> Self {
-        try Self(innerGraph.removeEdge(edge))
+        try copySettingInnerGraph(innerGraph.removeEdge(edge))
     }
 
     func removeNodeEdges(_ node: NodeID) throws -> Self {
-        try Self(innerGraph.removeNodeEdges(node))
+        try copySettingInnerGraph(innerGraph.removeNodeEdges(node))
     }
     
     func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
-        try Self(innerGraph.moveEdge(edge, newTail: newTail, newHead: newHead))
+        try copySettingInnerGraph(innerGraph.moveEdge(edge, newTail: newTail, newHead: newHead))
     }
 }
 

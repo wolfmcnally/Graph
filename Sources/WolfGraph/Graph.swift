@@ -111,6 +111,10 @@ extension Graph: ViewableGraph {
 }
 
 extension Graph: EditableGraph {
+    public func copySettingInnerGraph(_ innerGraph: Self) -> Self {
+        innerGraph
+    }
+    
     public func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
         try checkHasNode(node)
         var copy = self
