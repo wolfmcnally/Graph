@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ElementID: Hashable, Comparable, Codable, CustomStringConvertible {
+public protocol ElementID: Hashable, Comparable, CustomStringConvertible {
 }
 
 extension Int: ElementID { }

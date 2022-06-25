@@ -1,7 +1,7 @@
 import Foundation
 import WolfBase
 
-extension Graph: Codable {
+extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codable, EdgeData: Codable {
     enum CodingKeys: CodingKey {
         case nodes
         case edges

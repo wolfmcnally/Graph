@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: Equatable, JSONCodable
+public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: Equatable
 where NodeID: ElementID, EdgeID: ElementID, NodeData: ElementData, EdgeData: ElementData
 {
     struct Node: Equatable {
@@ -257,4 +257,7 @@ private extension Graph {
     mutating func withEdge(_ edge: EdgeID, transform: (inout Edge) throws -> Void) throws {
         try transform(&_edges[edge]!)
     }
+}
+
+extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable, EdgeData: Codable {
 }
