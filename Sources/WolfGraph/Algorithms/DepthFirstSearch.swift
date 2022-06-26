@@ -6,8 +6,8 @@ fileprivate enum State {
 }
 
 public extension ViewableGraph {
-    func depthFirstSearch<NodeSequence, Visitor, Result>(roots: NodeSequence, visitor: Visitor, rootsOnly: Bool = false, isSorted: Bool = true, excludedEdge: EdgeID? = nil) -> Result
-    where NodeSequence: Sequence<NodeID>, Visitor: DFSVisitor, Visitor.Graph == Self, Result == Visitor.Result
+    func depthFirstSearch<Visitor, Result>(_ visitor: Visitor, roots: [NodeID] = [], rootsOnly: Bool = false, isSorted: Bool = true, excludedEdge: EdgeID? = nil) -> Result
+    where Visitor: DFSVisitor, Visitor.Graph == Self, Result == Visitor.Result
     {
         for node in nodes {
             if let result = visitor.initNode(node) {
