@@ -75,7 +75,7 @@ final class GraphTests: XCTestCase {
         XCTAssertEqual(graph.json, json)
     }
     
-    func testTestGraph() {
+    func testTestGraph2() {
         let graph = TestGraph.makeTree()
         let json = #"{"edges":{"AB":["A","B","AB"],"AC":["A","C","AC"],"AD":["A","D","AD"],"BI":["B","I","BI"],"CH":["C","H","CH"],"DE":["D","E","DE"],"DF":["D","F","DF"],"DG":["D","G","DG"],"EM":["E","M","EM"],"EN":["E","N","EN"],"EO":["E","O","EO"],"FL":["F","L","FL"],"HJ":["H","J","HJ"],"HK":["H","K","HK"]},"nodes":{"A":"A","B":"B","C":"C","D":"D","E":"E","F":"F","G":"G","H":"H","I":"I","J":"J","K":"K","L":"L","M":"M","N":"N","O":"O"}}"#
         XCTAssertEqual(graph.json, json)
