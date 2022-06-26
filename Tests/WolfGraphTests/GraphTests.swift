@@ -33,7 +33,37 @@ final class GraphTests: XCTestCase {
         XCTAssertEqual(graph, graph2)
         XCTAssertEqual(graph2.json, json)
     }
-    
+
+    func testVoidData() throws {
+        /// Because the node and edge data types are `Void`, the graph is not `Codable` or `Equatable`
+        typealias MyGraph = Graph<Int, Int, Void, Void>
+        let graph = try MyGraph()
+            .newNode(101)
+            .newNode(102)
+            .newNode(103)
+            .newNode(104)
+            .newEdge(1, tail: 101, head: 102)
+            .newEdge(2, tail: 101, head: 103)
+        XCTAssertEqual(graph.nodesCount, 4)
+        XCTAssertEqual(graph.edgesCount, 2)
+    }
+
+    func testEmptyData() throws {
+        typealias MyGraph = Graph<Int, Int, Empty, Empty>
+        let graph = try MyGraph()
+            .newNode(101)
+            .newNode(102)
+            .newNode(103)
+            .newNode(104)
+            .newEdge(1, tail: 101, head: 102)
+            .newEdge(2, tail: 101, head: 103)
+        let json = #"{"edges":{"1":[101,102,{}],"2":[101,103,{}]},"nodes":{"101":{},"102":{},"103":{},"104":{}}}"#
+        XCTAssertEqual(graph.json, json)
+        let graph2 = try MyGraph(json: json)
+        XCTAssertEqual(graph, graph2)
+        XCTAssertEqual(graph2.json, json)
+    }
+
     func testTestGraph1() throws {
         let graph = try TestGraph()
             .newNode("A")
