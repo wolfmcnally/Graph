@@ -41,6 +41,13 @@ struct TestGraph: EditableGraph, JSONCodable {
 }
 
 extension TestGraph {
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(innerGraph)
+    }
+}
+
+extension TestGraph {
     static func makeDAG() -> Self {
         try! Self(edges: [
             ("AC", "A", "C"),

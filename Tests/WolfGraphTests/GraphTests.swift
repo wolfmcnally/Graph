@@ -2,7 +2,7 @@ import XCTest
 import WolfGraph
 
 final class GraphTests: XCTestCase {
-    func test1() throws {
+    func testCodableData() throws {
         typealias MyGraph = Graph<Int, Int, String, String>
         let graph = try MyGraph()
             .newNode(101, data: "A")
@@ -18,7 +18,7 @@ final class GraphTests: XCTestCase {
         XCTAssertEqual(graph2.json, json)
     }
 
-    func test2() throws {
+    func testDefaultData() throws {
         typealias MyGraph = Graph<Int, Int, String, String>
         let graph = try MyGraph()
             .newNode(101)
@@ -39,13 +39,15 @@ final class GraphTests: XCTestCase {
             .newNode("A")
             .newNode("B")
             .newNode("C")
-            .newEdge("AB", tail: "A", head: "B", data: "")
-            .newEdge("AC", tail: "A", head: "C", data: "")
-        print(graph.json)
+            .newEdge("AB", tail: "A", head: "B")
+            .newEdge("AC", tail: "A", head: "C")
+        let json = #"{"edges":{"AB":["A","B",""],"AC":["A","C",""]},"nodes":{"A":"","B":"","C":""}}"#
+        XCTAssertEqual(graph.json, json)
     }
     
     func testTestGraph() {
         let graph = TestGraph.makeTree()
-        print(graph.json)
+        let json = #"{"edges":{"AB":["A","B","AB"],"AC":["A","C","AC"],"AD":["A","D","AD"],"BI":["B","I","BI"],"CH":["C","H","CH"],"DE":["D","E","DE"],"DF":["D","F","DF"],"DG":["D","G","DG"],"EM":["E","M","EM"],"EN":["E","N","EN"],"EO":["E","O","EO"],"FL":["F","L","FL"],"HJ":["H","J","HJ"],"HK":["H","K","HK"]},"nodes":{"A":"A","B":"B","C":"C","D":"D","E":"E","F":"F","G":"G","H":"H","I":"I","J":"J","K":"K","L":"L","M":"M","N":"N","O":"O"}}"#
+        XCTAssertEqual(graph.json, json)
     }
 }

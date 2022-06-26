@@ -1,7 +1,7 @@
 import XCTest
 import WolfGraph
 
-final class AlgorithmTests: XCTestCase {
+final class DepthFirstSearchTests: XCTestCase {
     func testDepthFirstSearch() throws {
         class Visitor: DFSVisitor {
             typealias Graph = TestGraph
