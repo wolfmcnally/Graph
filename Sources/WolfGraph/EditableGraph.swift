@@ -28,10 +28,6 @@ public extension EditableGraph {
         try copySettingInnerGraph(innerGraph.newNode(node, data: data))
     }
 
-    func newNode(_ node: NodeID) throws -> Self {
-        try copySettingInnerGraph(innerGraph.newNode(node, data: NodeData()))
-    }
-
     func removeNode(_ node: NodeID) throws -> Self {
         try copySettingInnerGraph(innerGraph.removeNode(node))
     }
@@ -65,8 +61,28 @@ public extension EditableGraph {
             $0 = data
         }
     }
+}
 
+public extension EditableGraph where NodeData: DefaultConstructable {
+    func newNode(_ node: NodeID) throws -> Self {
+        try copySettingInnerGraph(innerGraph.newNode(node, data: NodeData()))
+    }
+}
+
+public extension EditableGraph where EdgeData: DefaultConstructable {
     func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
         try newEdge(edge, tail: tail, head: head, data: EdgeData())
+    }
+}
+
+public extension EditableGraph where NodeData == Void {
+    func newNode(_ node: NodeID) throws -> Self {
+        try copySettingInnerGraph(innerGraph.newNode(node, data: ()))
+    }
+}
+
+public extension EditableGraph where EdgeData == Void {
+    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
+        try newEdge(edge, tail: tail, head: head, data: ())
     }
 }

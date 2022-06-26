@@ -3,8 +3,8 @@ import Foundation
 public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID, InnerGraph.NodeData == NodeData, InnerGraph.EdgeData == EdgeData {
     associatedtype NodeID: ElementID
     associatedtype EdgeID: ElementID
-    associatedtype NodeData: ElementData
-    associatedtype EdgeData: ElementData
+    associatedtype NodeData
+    associatedtype EdgeData
 
     associatedtype InnerGraph: ViewableGraph
     

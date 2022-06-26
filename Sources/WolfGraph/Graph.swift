@@ -1,9 +1,9 @@
 import Foundation
 
-public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: Equatable
-where NodeID: ElementID, EdgeID: ElementID, NodeData: ElementData, EdgeData: ElementData
+public struct Graph<NodeID, EdgeID, NodeData, EdgeData>
+where NodeID: ElementID, EdgeID: ElementID
 {
-    struct Node: Equatable {
+    struct Node {
         var inEdges: Set<EdgeID> = []
         var outEdges: Set<EdgeID> = []
         var data: NodeData
@@ -13,7 +13,7 @@ where NodeID: ElementID, EdgeID: ElementID, NodeData: ElementData, EdgeData: Ele
         }
     }
     
-    struct Edge: Equatable {
+    struct Edge {
         var tail: NodeID
         var head: NodeID
         var data: EdgeData
@@ -259,5 +259,23 @@ private extension Graph {
     }
 }
 
-extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable, EdgeData: Codable {
+extension Graph.Node: Equatable where Graph.NodeData: Equatable {
+    static func == (lhs: Graph.Node, rhs: Graph.Node) -> Bool {
+        lhs.inEdges == rhs.inEdges && lhs.outEdges == rhs.outEdges && lhs.data == rhs.data
+    }
+}
+
+extension Graph.Edge: Equatable where Graph.EdgeData: Equatable {
+    static func == (lhs: Graph.Edge, rhs: Graph.Edge) -> Bool {
+        lhs.tail == rhs.tail && lhs.head == rhs.head && lhs.data == rhs.data
+    }
+}
+
+extension Graph: Equatable where Graph.NodeData: Equatable, Graph.EdgeData: Equatable {
+    public static func == (lhs: Graph, rhs: Graph) -> Bool {
+        lhs._nodes == rhs._nodes && lhs._edges == rhs._edges
+    }
+}
+
+extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
 }
