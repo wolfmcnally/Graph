@@ -7,6 +7,7 @@ public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
     func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
     func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
     func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self
+    
     func newNode(_ node: NodeID, data: NodeData) throws -> Self
     func removeNode(_ node: NodeID) throws -> Self
     func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self

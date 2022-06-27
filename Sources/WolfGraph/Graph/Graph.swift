@@ -19,11 +19,6 @@ where NodeID: ElementID, EdgeID: ElementID
         var data: EdgeData
     }
     
-    enum Error: Swift.Error {
-        case notFound
-        case duplicate
-    }
-    
     var _nodes: [NodeID: Node] = [:]
     var _edges: [EdgeID: Edge] = [:]
     
@@ -214,38 +209,38 @@ extension Graph: EditableGraph {
 private extension Graph {
     func checkHasNode(_ node: NodeID) throws {
         guard hasNode(node) else {
-            throw Error.notFound
+            throw GraphError.notFound
         }
     }
     
     func checkHasNoNode(_ node: NodeID) throws {
         guard hasNoNode(node) else {
-            throw Error.duplicate
+            throw GraphError.duplicate
         }
     }
 
     func checkHasEdge(_ edge: EdgeID) throws {
         guard hasEdge(edge) else {
-            throw Error.notFound
+            throw GraphError.notFound
         }
     }
 
     func checkHasNoEdge(_ edge: EdgeID) throws {
         guard hasNoEdge(edge) else {
-            throw Error.duplicate
+            throw GraphError.duplicate
         }
     }
 
     func getNode(_ node: NodeID) throws -> Node {
         guard let result = _nodes[node] else {
-            throw Error.notFound
+            throw GraphError.notFound
         }
         return result
     }
     
     func getEdge(_ edge: EdgeID) throws -> Edge {
         guard let result = _edges[edge] else {
-            throw Error.notFound
+            throw GraphError.notFound
         }
         return result
     }
