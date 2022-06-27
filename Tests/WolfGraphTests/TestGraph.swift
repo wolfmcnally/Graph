@@ -1,7 +1,7 @@
 import Foundation
 import WolfGraph
 
-struct TestGraph: EditableGraph, JSONCodable {
+struct TestGraph: EditableGraph, JSONCodable, Equatable {
     typealias NodeID = String
     typealias EdgeID = String
     typealias NodeData = String
@@ -44,6 +44,11 @@ extension TestGraph {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(innerGraph)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self.innerGraph = try container.decode(InnerGraph.self)
     }
 }
 

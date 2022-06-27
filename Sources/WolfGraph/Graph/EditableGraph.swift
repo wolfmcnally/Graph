@@ -1,6 +1,8 @@
 import Foundation
 
 public protocol EditableGraph: ViewableGraph where InnerGraph: EditableGraph {
+    init()
+    
     func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self
     
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self

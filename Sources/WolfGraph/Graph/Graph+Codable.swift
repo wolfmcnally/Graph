@@ -3,8 +3,8 @@ import WolfBase
 
 extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
     enum CodingKeys: CodingKey {
-        case nodes
         case edges
+        case nodes
     }
 
     struct EncodingEdge: Codable {
