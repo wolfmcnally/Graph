@@ -74,7 +74,7 @@ final class DepthFirstSearchTests: XCTestCase {
         ])
         
         let visitor = Visitor()
-        graph.depthFirstSearch(visitor, roots: ["A"])
+        try graph.depthFirstSearch(visitor, roots: ["A"])
 
         XCTAssertEqual(visitor.initNodes, ["A", "B", "C", "D"])
         XCTAssertEqual(visitor.startNodes, ["A"])

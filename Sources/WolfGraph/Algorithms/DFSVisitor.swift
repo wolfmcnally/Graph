@@ -6,29 +6,29 @@ public protocol DFSVisitor {
     typealias NodeID = Graph.NodeID
     typealias EdgeID = Graph.EdgeID
     
-    func initNode(_ node: NodeID) -> Result?
-    func startNode(_ node: NodeID) -> Result?
-    func discoverNode(_ node: NodeID) -> Result?
-    func finishNode(_ node: NodeID) -> Result?
+    func initNode(_ node: NodeID) throws -> Result?
+    func startNode(_ node: NodeID) throws -> Result?
+    func discoverNode(_ node: NodeID) throws -> Result?
+    func finishNode(_ node: NodeID) throws -> Result?
     
-    func examineEdge(_ edge: EdgeID) -> Result?
-    func treeEdge(_ edge: EdgeID) -> Result?
-    func backEdge(_ edge: EdgeID) -> Result?
-    func forwardOrCrosseEdge(_ edge: EdgeID) -> Result?
-    func finishEdge(_ edge: EdgeID) -> Result?
+    func examineEdge(_ edge: EdgeID) throws -> Result?
+    func treeEdge(_ edge: EdgeID) throws -> Result?
+    func backEdge(_ edge: EdgeID) throws -> Result?
+    func forwardOrCrosseEdge(_ edge: EdgeID) throws -> Result?
+    func finishEdge(_ edge: EdgeID) throws -> Result?
     
     func finish() -> Result
 }
 
 public extension DFSVisitor {
-    func initNode(_ node: NodeID) -> Result? { nil }
-    func startNode(_ node: NodeID) -> Result? { nil }
-    func discoverNode(_ node: NodeID) -> Result? { nil }
-    func finishNode(_ node: NodeID) -> Result? { nil }
+    func initNode(_ node: NodeID) throws -> Result? { nil }
+    func startNode(_ node: NodeID) throws -> Result? { nil }
+    func discoverNode(_ node: NodeID) throws -> Result? { nil }
+    func finishNode(_ node: NodeID) throws -> Result? { nil }
     
-    func examineEdge(_ edge: EdgeID) -> Result? { nil }
-    func treeEdge(_ edge: EdgeID) -> Result? { nil }
-    func backEdge(_ edge: EdgeID) -> Result? { nil }
-    func forwardOrCrosseEdge(_ edge: EdgeID) -> Result? { nil }
-    func finishEdge(_ edge: EdgeID) -> Result? { nil }
+    func examineEdge(_ edge: EdgeID) throws -> Result? { nil }
+    func treeEdge(_ edge: EdgeID) throws -> Result? { nil }
+    func backEdge(_ edge: EdgeID) throws -> Result? { nil }
+    func forwardOrCrosseEdge(_ edge: EdgeID) throws -> Result? { nil }
+    func finishEdge(_ edge: EdgeID) throws -> Result? { nil }
 }

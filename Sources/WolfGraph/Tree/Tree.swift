@@ -8,7 +8,7 @@ where NodeID: ElementID, EdgeID: ElementID
     public let innerGraph: InnerGraph
     
     public init(innerGraph: InnerGraph, root: NodeID) throws {
-        guard innerGraph.isTree(root: root) else {
+        guard try innerGraph.isTree(root: root) else {
             throw GraphError.notATree
         }
         self.innerGraph = innerGraph

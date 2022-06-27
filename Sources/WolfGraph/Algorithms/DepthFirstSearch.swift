@@ -6,11 +6,11 @@ fileprivate enum State {
 }
 
 public extension ViewableGraph {
-    func depthFirstSearch<Visitor, Result>(_ visitor: Visitor, roots: [NodeID] = [], rootsOnly: Bool = false, isSorted: Bool = true, excludedEdge: EdgeID? = nil) -> Result
+    func depthFirstSearch<Visitor, Result>(_ visitor: Visitor, roots: [NodeID] = [], rootsOnly: Bool = false, isSorted: Bool = true, excludedEdge: EdgeID? = nil) throws -> Result
     where Visitor: DFSVisitor, Visitor.Graph == Self, Result == Visitor.Result
     {
         for node in nodes {
-            if let result = visitor.initNode(node) {
+            if let result = try visitor.initNode(node) {
                 return result
             }
         }
@@ -18,13 +18,13 @@ public extension ViewableGraph {
         var states: [NodeID: State] = [:]
         
         for root in roots.sortedIf(isSorted) {
-            if let result = searchFromRoot(root) {
+            if let result = try searchFromRoot(root) {
                 return result
             }
         }
         if !rootsOnly {
             for node in nodes.sortedIf(isSorted) {
-                if let result = searchFromRoot(node) {
+                if let result = try searchFromRoot(node) {
                     return result
                 }
             }
@@ -32,18 +32,18 @@ public extension ViewableGraph {
         
         return visitor.finish()
         
-        func searchFromRoot(_ root: NodeID) -> Result? {
+        func searchFromRoot(_ root: NodeID) throws -> Result? {
             if states[root] != nil {
                 return nil
             }
-            if let result = visitor.startNode(root) {
+            if let result = try visitor.startNode(root) {
                 return result
             }
             states[root] = .discovered
-            if let result = visitor.discoverNode(root) {
+            if let result = try visitor.discoverNode(root) {
                 return result
             }
-            let outEdges = try!
+            let outEdges = try
                 nodeOutEdges(root)
                 .filter {
                     $0 != excludedEdge
@@ -55,47 +55,47 @@ public extension ViewableGraph {
                 var tail = tail
                 if
                     let finishedEdge,
-                    let result = visitor.finishEdge(finishedEdge)
+                    let result = try visitor.finishEdge(finishedEdge)
                 {
                     return result
                 }
                 
                 var remainingOutEdges = remainingOutEdges
                 while let edge = remainingOutEdges.popLast() {
-                    let head = try! edgeHead(edge)
-                    if let result = visitor.examineEdge(edge) {
+                    let head = try edgeHead(edge)
+                    if let result = try visitor.examineEdge(edge) {
                         return result
                     }
                     switch states[head] {
                     case nil:
-                        if let result = visitor.treeEdge(edge) {
+                        if let result = try visitor.treeEdge(edge) {
                             return result
                         }
                         stack.append((tail, edge, remainingOutEdges))
                         tail = head
                         states[tail] = .discovered
-                        if let result = visitor.discoverNode(tail) {
+                        if let result = try visitor.discoverNode(tail) {
                             return result
                         }
-                        remainingOutEdges = try! nodeOutEdges(tail).sortedIf(isSorted)
+                        remainingOutEdges = try nodeOutEdges(tail).sortedIf(isSorted)
                     case .discovered:
-                        if let result = visitor.backEdge(edge) {
+                        if let result = try visitor.backEdge(edge) {
                             return result
                         }
-                        if let result = visitor.finishEdge(edge) {
+                        if let result = try visitor.finishEdge(edge) {
                             return result
                         }
                     case .finished:
-                        if let result = visitor.forwardOrCrosseEdge(edge) {
+                        if let result = try visitor.forwardOrCrosseEdge(edge) {
                             return result
                         }
-                        if let result = visitor.finishEdge(edge) {
+                        if let result = try visitor.finishEdge(edge) {
                             return result
                         }
                     }
                 }
                 states[tail] = .finished
-                if let result = visitor.finishNode(tail) {
+                if let result = try visitor.finishNode(tail) {
                     return result
                 }
             }

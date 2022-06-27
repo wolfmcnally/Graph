@@ -1,8 +1,8 @@
 import Foundation
 
 public extension ViewableGraph {
-    func isTree(root: NodeID) -> Bool {
-        depthFirstSearch(IsTreeVisitor(root: root), roots: [root], isSorted: false)
+    func isTree(root: NodeID) throws -> Bool {
+        try depthFirstSearch(IsTreeVisitor(root: root), roots: [root], isSorted: false)
     }
 }
 
@@ -17,11 +17,7 @@ fileprivate class IsTreeVisitor<Graph: ViewableGraph>: DFSVisitor {
     }
     
     func startNode(_ node: NodeID) -> Bool? {
-        if node == root {
-            return nil
-        } else {
-            return false
-        }
+        node == root ? nil : false
     }
     
     func backEdge(_ edge: EdgeID) -> Bool? { false }

@@ -8,11 +8,11 @@ final class IsTreeTests: XCTestCase {
         var g = G()
 
         func isATree() {
-            XCTAssertTrue(g.isTree(root: "root"))
+            try! XCTAssertTrue(g.isTree(root: "root"))
         }
         
         func isNotATree(root: String = "root") {
-            XCTAssertFalse(g.isTree(root: root))
+            try! XCTAssertFalse(g.isTree(root: root))
         }
 
         // Only a root? That's a tree.
