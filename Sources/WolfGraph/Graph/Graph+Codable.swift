@@ -14,7 +14,9 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
             var container = encoder.unkeyedContainer()
             try container.encode(edge.tail)
             try container.encode(edge.head)
-            try container.encode(edge.data)
+            if EdgeData.self != Empty.self {
+                try container.encode(edge.data)
+            }
         }
         
         init(edge: Edge) {
@@ -25,7 +27,12 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
             var container = try decoder.unkeyedContainer()
             let tail = try container.decode(NodeID.self)
             let head = try container.decode(NodeID.self)
-            let data = try container.decode(EdgeData.self)
+            let data: EdgeData
+            if EdgeData.self == Empty.self {
+                data = Empty() as! EdgeData
+            } else {
+                data = try container.decode(EdgeData.self)
+            }
             self.edge = Edge(tail: tail, head: head, data: data)
         }
     }
@@ -52,10 +59,17 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        let nodes: Dictionary<NodeID, EncodingNode> = _nodes.reduce(into: .init()) { result, element in
-            result[element.key] = EncodingNode(node: element.value)
+        if NodeData.self == Empty.self {
+            let nodes: [NodeID] = _nodes.reduce(into: []) { result, element in
+                result.append(element.key)
+            }.sorted()
+            try container.encode(nodes, forKey: .nodes)
+        } else {
+            let nodes: Dictionary<NodeID, EncodingNode> = _nodes.reduce(into: .init()) { result, element in
+                result[element.key] = EncodingNode(node: element.value)
+            }
+            try container.encode(nodes, forKey: .nodes)
         }
-        try container.encode(nodes, forKey: .nodes)
 
         let edges: Dictionary<EdgeID, EncodingEdge> = _edges.reduce(into: .init()) { result, element in
             result[element.key] = EncodingEdge(edge: element.value)
@@ -66,12 +80,21 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let edges = try container.decode(Dictionary<EdgeID, EncodingEdge>.self, forKey: .edges)
-        let nodes = try container.decode(Dictionary<NodeID, EncodingNode>.self, forKey: .nodes)
         var graph = Self()
-        try nodes.forEach {
-            graph = try graph.newNode($0.key, data: $0.value.node.data)
+
+        if NodeData.self == Empty.self {
+            let nodes = try container.decode([NodeID].self, forKey: .nodes)
+            try nodes.forEach {
+                graph = try graph.newNode($0)
+            }
+        } else {
+            let nodes = try container.decode(Dictionary<NodeID, EncodingNode>.self, forKey: .nodes)
+            try nodes.forEach {
+                graph = try graph.newNode($0.key, data: $0.value.node.data)
+            }
         }
+
+        let edges = try container.decode(Dictionary<EdgeID, EncodingEdge>.self, forKey: .edges)
         try edges.forEach {
             let edge = $0.value.edge
             graph = try graph.newEdge($0.key, tail: edge.tail, head: edge.head, data: edge.data)

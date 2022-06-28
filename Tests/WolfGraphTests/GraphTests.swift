@@ -57,7 +57,7 @@ final class GraphTests: XCTestCase {
             .newNode(104)
             .newEdge(1, tail: 101, head: 102)
             .newEdge(2, tail: 101, head: 103)
-        let json = #"{"edges":{"1":[101,102,{}],"2":[101,103,{}]},"nodes":{"101":{},"102":{},"103":{},"104":{}}}"#
+        let json = #"{"edges":{"1":[101,102],"2":[101,103]},"nodes":[101,102,103,104]}"#
         XCTAssertEqual(graph.jsonString, json)
         let graph2 = try MyGraph.fromJSON(json)
         XCTAssertEqual(graph, graph2)
