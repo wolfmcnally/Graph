@@ -1,17 +1,17 @@
 import Foundation
 
-public struct Tree<TreeInnerGraph>: ViewableTree
-where TreeInnerGraph: ViewableGraph
+public struct Tree<InnerGraph>: ViewableTree
+where InnerGraph: ViewableGraph
 {
-    public typealias NodeID = TreeInnerGraph.NodeID
-    public typealias EdgeID = TreeInnerGraph.EdgeID
-    public typealias NodeData = TreeInnerGraph.NodeData
-    public typealias EdgeData = TreeInnerGraph.EdgeData
+    public typealias NodeID = InnerGraph.NodeID
+    public typealias EdgeID = InnerGraph.EdgeID
+    public typealias NodeData = InnerGraph.NodeData
+    public typealias EdgeData = InnerGraph.EdgeData
     
     public let root: NodeID
-    public let innerGraph: TreeInnerGraph
+    public let innerGraph: InnerGraph
     
-    public init(innerGraph: TreeInnerGraph, root: NodeID) throws {
+    public init(innerGraph: InnerGraph, root: NodeID) throws {
         guard try innerGraph.isTree(root: root) else {
             throw GraphError.notATree
         }
@@ -20,34 +20,36 @@ where TreeInnerGraph: ViewableGraph
     }
 }
 
-extension Tree: EditableTree where TreeInnerGraph: EditableGraph {
-    init(uncheckedInnerGraph: TreeInnerGraph, root: NodeID) {
+extension Tree: EditableTree
+where InnerGraph: EditableGraph
+{
+    init(uncheckedInnerGraph: InnerGraph, root: NodeID) {
         self.innerGraph = uncheckedInnerGraph
         self.root = root
     }
     
-    public func copySettingInnerGraph(_ innerGraph: TreeInnerGraph) -> Self {
+    public func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
         Self(uncheckedInnerGraph: innerGraph, root: root)
     }
 
     public init(root: NodeID, data: NodeData) {
-        self.innerGraph = try! TreeInnerGraph()
+        self.innerGraph = try! InnerGraph()
             .newNode(root, data: data)
         self.root = root
     }
 }
 
-extension Tree where TreeInnerGraph: EditableGraph, NodeData: DefaultConstructable {
+extension Tree where InnerGraph: EditableGraph, NodeData: DefaultConstructable {
     public init(root: NodeID) {
         self.init(root: root, data: NodeData())
     }
 }
 
-extension Tree where TreeInnerGraph: EditableGraph, NodeData == Void {
+extension Tree where InnerGraph: EditableGraph, NodeData == Void {
     public init(root: NodeID) {
         self.init(root: root, data: ())
     }
 }
 
-extension Tree: Equatable where TreeInnerGraph: Equatable {
+extension Tree: Equatable where InnerGraph: Equatable {
 }

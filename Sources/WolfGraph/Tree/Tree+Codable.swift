@@ -1,7 +1,7 @@
 import Foundation
 import WolfBase
 
-extension Tree: Codable where TreeInnerGraph: Codable, NodeID: Codable {
+extension Tree: Codable where InnerGraph: Codable, NodeID: Codable {
     enum CodingKeys: String, CodingKey {
         case graph
         case root
@@ -21,5 +21,5 @@ extension Tree: Codable where TreeInnerGraph: Codable, NodeID: Codable {
     }
 }
 
-extension Tree: JSONCodable where TreeInnerGraph: Codable, NodeID: Codable {
-}
+//extension Tree: JSONCodable where InnerGraph: Codable, NodeID: Codable {
+//}

@@ -272,5 +272,5 @@ extension Graph: Equatable where Graph.NodeData: Equatable, Graph.EdgeData: Equa
     }
 }
 
-extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
-}
+//extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
+//}

@@ -1,7 +1,7 @@
 import Foundation
 import WolfGraph
 
-struct TestGraph: EditableGraph, JSONCodable, Equatable {
+struct TestGraph: EditableGraph, Codable, Equatable {
     typealias NodeID = String
     typealias EdgeID = String
     typealias NodeData = String
