@@ -1,30 +1,18 @@
 import Foundation
 
-public protocol ViewableCompound: ViewableGraph
-where EdgeID == InnerTree.EdgeID, NodeID == InnerTree.NodeID
+public protocol ViewableCompound: ViewableTree
+where NodeID == InnerTree.NodeID, EdgeID == InnerTree.EdgeID
 {
     associatedtype InnerTree: ViewableTree
-    
-    var root: NodeID { get }
-    var tree: InnerTree { get }
-
-    //
-    // Queries the tree
-    //
-    
-    func inEdge(_ node: NodeID) throws -> EdgeID?
-    func parent(_ node: NodeID) throws -> NodeID?
+    var innerTree: InnerTree { get }
 }
 
-public extension ViewableCompound {
-    func inEdge(_ node: NodeID) throws -> EdgeID? {
-        try tree.nodeInEdges(node).first
+extension ViewableCompound {
+    public func inEdge(_ node: NodeID) throws -> EdgeID? {
+        try innerTree.inEdge(node)
     }
-
-    func parent(_ node: NodeID) throws -> NodeID? {
-        guard let e = try tree.inEdge(node) else {
-            return nil
-        }
-        return try! tree.edgeTail(e)
+    
+    public func parent(_ node: NodeID) throws -> NodeID? {
+        try innerTree.parent(node)
     }
 }

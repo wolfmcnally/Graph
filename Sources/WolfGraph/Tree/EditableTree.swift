@@ -3,7 +3,7 @@ import WolfBase
 
 public protocol EditableTree: ViewableTree where InnerGraph: EditableGraph
 {
-    init(root: NodeID, data: NodeData)
+//    init(root: NodeID, data: NodeData)
     
     func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self
     

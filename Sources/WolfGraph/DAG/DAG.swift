@@ -21,9 +21,9 @@ where InnerGraph: ViewableGraph
 extension DAG: EditableDAG, EditableGraph
 where InnerGraph: EditableGraph
 {
-    public init() {
-        try! self.init(innerGraph: InnerGraph())
-    }
+//    public init() {
+//        try! self.init(innerGraph: InnerGraph())
+//    }
     
     init(uncheckedInnerGraph: InnerGraph) {
         self.innerGraph = uncheckedInnerGraph

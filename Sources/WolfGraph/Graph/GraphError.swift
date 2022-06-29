@@ -5,4 +5,5 @@ public enum GraphError: Error {
     case duplicate
     case notATree
     case notADAG
+    case notACompound
 }

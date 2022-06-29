@@ -5,6 +5,7 @@ public protocol ViewableTree: ViewableGraph {
 
     func inEdge(_ node: NodeID) throws -> EdgeID?
     func parent(_ node: NodeID) throws -> NodeID?
+    var nonRootNodes: [NodeID] { get }
 }
 
 public extension ViewableTree {
@@ -17,5 +18,9 @@ public extension ViewableTree {
             return nil
         }
         return try! edgeTail(e)
+    }
+    
+    var nonRootNodes: [NodeID] {
+        nodes.filter { $0 != root }
     }
 }

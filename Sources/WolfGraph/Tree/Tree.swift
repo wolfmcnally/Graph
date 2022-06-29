@@ -32,24 +32,24 @@ where InnerGraph: EditableGraph
         Self(uncheckedInnerGraph: innerGraph, root: root)
     }
 
-    public init(root: NodeID, data: NodeData) {
-        self.innerGraph = try! InnerGraph()
-            .newNode(root, data: data)
-        self.root = root
-    }
+//    public init(root: NodeID, data: NodeData) {
+//        self.innerGraph = try! InnerGraph()
+//            .newNode(root, data: data)
+//        self.root = root
+//    }
 }
 
-extension Tree where InnerGraph: EditableGraph, NodeData: DefaultConstructable {
-    public init(root: NodeID) {
-        self.init(root: root, data: NodeData())
-    }
-}
-
-extension Tree where InnerGraph: EditableGraph, NodeData == Void {
-    public init(root: NodeID) {
-        self.init(root: root, data: ())
-    }
-}
+//extension Tree where InnerGraph: EditableGraph, NodeData: DefaultConstructable {
+//    public init(root: NodeID) {
+//        self.init(root: root, data: NodeData())
+//    }
+//}
+//
+//extension Tree where InnerGraph: EditableGraph, NodeData == Void {
+//    public init(root: NodeID) {
+//        self.init(root: root, data: ())
+//    }
+//}
 
 extension Tree: Equatable where InnerGraph: Equatable {
 }
