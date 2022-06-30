@@ -8,7 +8,7 @@ public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.Edge
 
     associatedtype InnerGraph: ViewableGraph
     
-    var innerGraph: InnerGraph { get }
+    var graph: InnerGraph { get }
     
     var isEmpty: Bool { get }
 
@@ -39,83 +39,83 @@ public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.Edge
 }
 
 public extension ViewableGraph {
-    var innerGraph: Self {
+    var graph: Self {
         self
     }
 
     var isEmpty: Bool {
-        innerGraph.isEmpty
+        graph.isEmpty
     }
     
     var nodesCount: Int {
-        innerGraph.nodesCount
+        graph.nodesCount
     }
     
     var edgesCount: Int {
-        innerGraph.edgesCount
+        graph.edgesCount
     }
     
     var nodes: [NodeID] {
-        innerGraph.nodes
+        graph.nodes
     }
     
     var edges: [EdgeID] {
-        innerGraph.edges
+        graph.edges
     }
     
     func hasNode(_ node: NodeID) -> Bool {
-        innerGraph.hasNode(node)
+        graph.hasNode(node)
     }
     
     func hasNoNode(_ node: NodeID) -> Bool {
-        innerGraph.hasNoNode(node)
+        graph.hasNoNode(node)
     }
     
     func hasEdge(_ edge: EdgeID) -> Bool {
-        innerGraph.hasEdge(edge)
+        graph.hasEdge(edge)
     }
     
     func hasNoEdge(_ edge: EdgeID) -> Bool {
-        innerGraph.hasNoEdge(edge)
+        graph.hasNoEdge(edge)
     }
     
     func nodeData(_ node: NodeID) throws -> NodeData {
-        try innerGraph.nodeData(node)
+        try graph.nodeData(node)
     }
     
     func edgeData(_ edge: EdgeID) throws -> EdgeData {
-        try innerGraph.edgeData(edge)
+        try graph.edgeData(edge)
     }
     
     func nodeOutEdges(_ node: NodeID) throws -> [EdgeID] {
-        try innerGraph.nodeOutEdges(node)
+        try graph.nodeOutEdges(node)
     }
     
     func nodeInEdges(_ node: NodeID) throws -> [EdgeID] {
-        try innerGraph.nodeInEdges(node)
+        try graph.nodeInEdges(node)
     }
     
     func nodeEdges(_ node: NodeID) throws -> [EdgeID] {
-        try innerGraph.nodeEdges(node)
+        try graph.nodeEdges(node)
     }
     
     func nodeSuccessors(_ node: NodeID) throws -> [NodeID] {
-        try innerGraph.nodeSuccessors(node)
+        try graph.nodeSuccessors(node)
     }
     
     func nodePredecessors(_ node: NodeID) throws -> [NodeID] {
-        try innerGraph.nodePredecessors(node)
+        try graph.nodePredecessors(node)
     }
     
     func nodeNeighbors(_ node: NodeID) throws -> [NodeID] {
-        try innerGraph.nodeNeighbors(node)
+        try graph.nodeNeighbors(node)
     }
     
     func edgeHead(_ edge: EdgeID) throws -> NodeID {
-        try innerGraph.edgeHead(edge)
+        try graph.edgeHead(edge)
     }
     
     func edgeTail(_ edge: EdgeID) throws -> NodeID {
-        try innerGraph.edgeTail(edge)
+        try graph.edgeTail(edge)
     }
 }

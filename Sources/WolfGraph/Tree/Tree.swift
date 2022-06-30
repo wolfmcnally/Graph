@@ -9,13 +9,13 @@ where InnerGraph: ViewableGraph
     public typealias EdgeData = InnerGraph.EdgeData
     
     public let root: NodeID
-    public let innerGraph: InnerGraph
+    public let graph: InnerGraph
     
-    public init(innerGraph: InnerGraph, root: NodeID) throws {
-        guard try innerGraph.isTree(root: root) else {
+    public init(graph: InnerGraph, root: NodeID) throws {
+        guard try graph.isTree(root: root) else {
             throw GraphError.notATree
         }
-        self.innerGraph = innerGraph
+        self.graph = graph
         self.root = root
     }
 }
@@ -24,32 +24,14 @@ extension Tree: EditableTree
 where InnerGraph: EditableGraph
 {
     init(uncheckedInnerGraph: InnerGraph, root: NodeID) {
-        self.innerGraph = uncheckedInnerGraph
+        self.graph = uncheckedInnerGraph
         self.root = root
     }
     
-    public func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
-        Self(uncheckedInnerGraph: innerGraph, root: root)
+    public func copySettingInner(graph: InnerGraph) -> Self {
+        Self(uncheckedInnerGraph: graph, root: root)
     }
-
-//    public init(root: NodeID, data: NodeData) {
-//        self.innerGraph = try! InnerGraph()
-//            .newNode(root, data: data)
-//        self.root = root
-//    }
 }
-
-//extension Tree where InnerGraph: EditableGraph, NodeData: DefaultConstructable {
-//    public init(root: NodeID) {
-//        self.init(root: root, data: NodeData())
-//    }
-//}
-//
-//extension Tree where InnerGraph: EditableGraph, NodeData == Void {
-//    public init(root: NodeID) {
-//        self.init(root: root, data: ())
-//    }
-//}
 
 extension Tree: Equatable where InnerGraph: Equatable {
 }

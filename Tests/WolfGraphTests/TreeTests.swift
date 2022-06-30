@@ -3,7 +3,7 @@ import WolfGraph
 
 final class TreeTests: XCTestCase {
     func testIsTree() throws {
-        typealias G = Graph<String, String, Void, Void>
+        typealias G = Graph<String, String, Empty, Empty>
         
         var g = G()
 
@@ -77,8 +77,8 @@ final class TreeTests: XCTestCase {
     }
     
     func testTreeCodable() throws {
-        let t1 = try Tree(innerGraph: TestGraph.makeTree(), root: "A")
-        let json = #"{"graph":{"edges":{"AB":["A","B","AB"],"AC":["A","C","AC"],"AD":["A","D","AD"],"BI":["B","I","BI"],"CH":["C","H","CH"],"DE":["D","E","DE"],"DF":["D","F","DF"],"DG":["D","G","DG"],"EM":["E","M","EM"],"EN":["E","N","EN"],"EO":["E","O","EO"],"FL":["F","L","FL"],"HJ":["H","J","HJ"],"HK":["H","K","HK"]},"nodes":{"A":"A","B":"B","C":"C","D":"D","E":"E","F":"F","G":"G","H":"H","I":"I","J":"J","K":"K","L":"L","M":"M","N":"N","O":"O"}},"root":"A"}"#
+        let t1 = try Tree(graph: TestGraph.makeTree(), root: "A")
+        let json = #"{"edges":{"AB":["A","B","AB"],"AC":["A","C","AC"],"AD":["A","D","AD"],"BI":["B","I","BI"],"CH":["C","H","CH"],"DE":["D","E","DE"],"DF":["D","F","DF"],"DG":["D","G","DG"],"EM":["E","M","EM"],"EN":["E","N","EN"],"EO":["E","O","EO"],"FL":["F","L","FL"],"HJ":["H","J","HJ"],"HK":["H","K","HK"]},"nodes":{"A":"A","B":"B","C":"C","D":"D","E":"E","F":"F","G":"G","H":"H","I":"I","J":"J","K":"K","L":"L","M":"M","N":"N","O":"O"},"root":"A"}"#
         XCTAssertEqual(t1.jsonString, json)
         let t2 = try Tree<TestGraph>.fromJSON(json)
         XCTAssertEqual(t1, t2)

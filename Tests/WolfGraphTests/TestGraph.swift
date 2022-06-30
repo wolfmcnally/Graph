@@ -8,18 +8,18 @@ struct TestGraph: EditableGraph, Codable, Equatable {
     typealias EdgeData = String
 
     typealias InnerGraph = Graph<NodeID, EdgeID, NodeData, EdgeData>
-    let innerGraph: InnerGraph
+    let graph: InnerGraph
 
     init() {
-        innerGraph = InnerGraph()
+        graph = InnerGraph()
     }
     
-    private init(innerGraph: InnerGraph) {
-        self.innerGraph = innerGraph
+    private init(graph: InnerGraph) {
+        self.graph = graph
     }
     
-    func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
-        Self(innerGraph: innerGraph)
+    func copySettingInner(graph: InnerGraph) -> Self {
+        Self(graph: graph)
     }
 
     init(edges: [(String, String, String)]) throws {
@@ -36,19 +36,19 @@ struct TestGraph: EditableGraph, Codable, Equatable {
             graph = try graph.newEdge(label, tail: tail, head: head, data: label)
         }
         
-        self.innerGraph = graph
+        self.graph = graph
     }
 }
 
 extension TestGraph {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(innerGraph)
+        try container.encode(graph)
     }
     
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        self.innerGraph = try container.decode(InnerGraph.self)
+        self.graph = try container.decode(InnerGraph.self)
     }
 }
 

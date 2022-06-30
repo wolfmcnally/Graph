@@ -17,21 +17,9 @@ where InnerGraph: EditableGraph, InnerTree: EditableTree, InnerGraph.NodeID == I
     public typealias NodeData = InnerGraph.NodeData
     public typealias EdgeData = InnerGraph.EdgeData
 
-    public let innerGraph: InnerGraph
-    public var innerTree: InnerTree
-    
-    public var root: NodeID {
-        innerTree.root
-    }
-}
+    public let graph: InnerGraph
+    public var tree: InnerTree
 
-extension Compound
-{
-    init(uncheckedInnerGraph: InnerGraph, uncheckedInnerTree: InnerTree) {
-        self.innerGraph = uncheckedInnerGraph
-        self.innerTree = uncheckedInnerTree
-    }
-    
     public init(graph: InnerGraph, tree: InnerTree) throws {
         guard
             graph.hasNoNode(tree.root),
@@ -40,19 +28,83 @@ extension Compound
             throw GraphError.notACompound
         }
         
-        self.innerGraph = graph
-        self.innerTree = tree
+        self.graph = graph
+        self.tree = tree
+    }
+
+    public var root: NodeID {
+        tree.root
+    }
+}
+
+extension Compound: EditableGraphBase {
+    init(uncheckedInnerGraph: InnerGraph, uncheckedInnerTree: InnerTree) {
+        self.graph = uncheckedInnerGraph
+        self.tree = uncheckedInnerTree
     }
     
-//    public init(graph: InnerGraph, root: NodeID, nextEdgeID: () -> EdgeID) throws {
-//        var tree = InnerTree(root: root, data: Empty())
-//        for node in graph.nodes {
-//            tree = try tree.newNode(node, parent: root, edge: nextEdgeID())
-//        }
-//        try self.init(graph: graph, tree: tree)
-//    }
+    public func copySettingInner(graph: InnerGraph) -> Self {
+        Self(uncheckedInnerGraph: graph, uncheckedInnerTree: tree)
+    }
     
-    public func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self {
-        Self(uncheckedInnerGraph: innerGraph, uncheckedInnerTree: innerTree)
+    public func copySettingInner(graph: InnerGraph, tree: InnerTree) -> Self {
+        Self(uncheckedInnerGraph: graph, uncheckedInnerTree: tree)
+    }
+    
+    /// Adding a node inserts it into both the graph and the tree, as a child of the specified `parent`.
+    public func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.newNode(node, data: data),
+            uncheckedInnerTree: tree.newNode(node, parent: parent, edge: edge)
+        )
+    }
+
+    /// Removing a node first promotes all its tree children to its parent,
+    /// then removes it from both the tree and the graph.
+    public func removeNode(_ node: NodeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.removeNode(node),
+            uncheckedInnerTree: tree.removeNodeUngrouping(node)
+        )
+    }
+    
+    /// Moves a node within the tree
+    public func moveNode(_ node: NodeID, newParent: NodeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph,
+            uncheckedInnerTree: tree.moveNode(node, newParent: newParent)
+        )
+    }
+    
+    /// Inserts an edge within the graph
+    public func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.newEdge(edge, tail: tail, head: head, data: data),
+            uncheckedInnerTree: tree
+        )
+    }
+    
+    /// Removes an edge from the graph
+    public func removeEdge(_ edge: EdgeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.removeEdge(edge),
+            uncheckedInnerTree: tree
+        )
+    }
+    
+    /// Removes all edges from a node in the graph
+    public func removeNodeEdges(_ node: NodeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.removeNodeEdges(node),
+            uncheckedInnerTree: tree
+        )
+    }
+    
+    /// Moves an edge within the graph
+    public func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
+        try Self(
+            uncheckedInnerGraph: graph.moveEdge(edge, newTail: newTail, newHead: newHead),
+            uncheckedInnerTree: tree
+        )
     }
 }

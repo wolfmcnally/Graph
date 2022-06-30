@@ -3,9 +3,7 @@ import WolfBase
 
 public protocol EditableTree: ViewableTree where InnerGraph: EditableGraph
 {
-//    init(root: NodeID, data: NodeData)
-    
-    func copySettingInnerGraph(_ innerGraph: InnerGraph) -> Self
+    func copySettingInner(graph: InnerGraph) -> Self
     
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self
     func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
@@ -20,11 +18,11 @@ public protocol EditableTree: ViewableTree where InnerGraph: EditableGraph
 
 public extension EditableTree {
     func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
-        try copySettingInnerGraph(innerGraph.withNodeData(node, transform: transform))
+        try copySettingInner(graph: graph.withNodeData(node, transform: transform))
     }
     
     func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
-        try copySettingInnerGraph(innerGraph.withEdgeData(edge, transform: transform))
+        try copySettingInner(graph: graph.withEdgeData(edge, transform: transform))
     }
     
     func setNodeData(_ node: NodeID, data: NodeData) throws -> Self {
@@ -40,7 +38,7 @@ public extension EditableTree {
     }
     
     func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws -> Self {
-        try copySettingInnerGraph(innerGraph
+        try copySettingInner(graph: graph
             .newNode(node, data: nodeData)
             .newEdge(edge, tail: parent, head: node, data: edgeData)
         )
@@ -59,9 +57,9 @@ public extension EditableTree {
         for child in children {
             copy = try copy.moveNode(child, newParent: newParent)
         }
-        let innerCopy = try copy.innerGraph.removeNode(node)
+        let innerCopy = try copy.graph.removeNode(node)
         
-        return copySettingInnerGraph(innerCopy)
+        return copySettingInner(graph: innerCopy)
     }
     
     func removeNodeAndChildren(_ node: NodeID) throws -> Self {
@@ -72,12 +70,12 @@ public extension EditableTree {
 
         // Remove child nodes in reverse-topological sort order (most distant from the target first).
         let removeOrder = try! topologicalSort(roots: [node], rootsOnly: true, isSorted: false)
-        var innerCopy = self.innerGraph
+        var innerCopy = self.graph
         for node in removeOrder {
             innerCopy = try innerCopy.removeNode(node)
         }
         
-        return copySettingInnerGraph(innerCopy)
+        return copySettingInner(graph: innerCopy)
     }
 
     func moveNode(_ node: NodeID, newParent: NodeID) throws -> Self {
@@ -90,7 +88,7 @@ public extension EditableTree {
         guard try canMoveDAGEdge(edge, newTail: newParent, newHead: node) else {
             throw GraphError.notATree
         }
-        return try copySettingInnerGraph(innerGraph.moveEdge(edge, newTail: newParent, newHead: node))
+        return try copySettingInner(graph: graph.moveEdge(edge, newTail: newParent, newHead: node))
     }
 }
 

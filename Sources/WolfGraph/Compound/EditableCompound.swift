@@ -1,8 +1,7 @@
 import Foundation
 
-public protocol EditableCompound: ViewableCompound, EditableGraph
+public protocol EditableCompound: ViewableCompound
 where InnerTree: EditableTree
 {
-    init(graph: InnerGraph, tree: InnerTree) throws
-//    init(graph: InnerGraph, root: NodeID, nextEdgeID: () -> EdgeID) throws
+    func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws -> Self
 }

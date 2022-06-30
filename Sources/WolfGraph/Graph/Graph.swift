@@ -106,8 +106,8 @@ extension Graph: ViewableGraph {
 }
 
 extension Graph: EditableGraph {
-    public func copySettingInnerGraph(_ innerGraph: Self) -> Self {
-        innerGraph
+    public func copySettingInner(graph: Self) -> Self {
+        graph
     }
     
     public func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
@@ -271,6 +271,3 @@ extension Graph: Equatable where Graph.NodeData: Equatable, Graph.EdgeData: Equa
         lhs._nodes == rhs._nodes && lhs._edges == rhs._edges
     }
 }
-
-//extension Graph: JSONCodable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
-//}

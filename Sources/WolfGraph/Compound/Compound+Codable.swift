@@ -8,8 +8,8 @@ extension Compound: Codable where InnerGraph: Codable, InnerTree: Codable {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(innerGraph, forKey: .graph)
-        try container.encode(innerTree, forKey: .tree)
+        try container.encode(graph, forKey: .graph)
+        try container.encode(tree, forKey: .tree)
     }
     
     public init(from decoder: Decoder) throws {

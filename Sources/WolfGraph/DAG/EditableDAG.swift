@@ -1,5 +1,4 @@
 import Foundation
 
-public protocol EditableDAG: ViewableDAG, EditableGraph
-{
+public protocol EditableDAG: ViewableDAG, EditableGraph {
 }

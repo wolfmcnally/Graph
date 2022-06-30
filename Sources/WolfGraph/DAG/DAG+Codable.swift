@@ -3,12 +3,12 @@ import Foundation
 extension DAG: Codable where InnerGraph: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(innerGraph)
+        try container.encode(graph)
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let graph = try container.decode(InnerGraph.self)
-        try self.init(innerGraph: graph)
+        try self.init(graph: graph)
     }
 }
