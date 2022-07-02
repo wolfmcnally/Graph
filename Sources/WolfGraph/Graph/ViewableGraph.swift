@@ -36,6 +36,7 @@ public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.Edge
 
     func edgeHead(_ edge: EdgeID) throws -> NodeID
     func edgeTail(_ edge: EdgeID) throws -> NodeID
+    func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID)
 }
 
 public extension ViewableGraph {
@@ -117,5 +118,9 @@ public extension ViewableGraph {
     
     func edgeTail(_ edge: EdgeID) throws -> NodeID {
         try graph.edgeTail(edge)
+    }
+    
+    func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID) {
+        try graph.edgeEnds(edge)
     }
 }

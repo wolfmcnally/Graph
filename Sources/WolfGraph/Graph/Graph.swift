@@ -103,6 +103,11 @@ extension Graph: ViewableGraph {
     public func edgeTail(_ edge: EdgeID) throws -> NodeID {
         try getEdge(edge).tail
     }
+    
+    public func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID) {
+        let e = try getEdge(edge)
+        return (e.tail, e.head)
+    }
 }
 
 extension Graph: EditableGraph {
