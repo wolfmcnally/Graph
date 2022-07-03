@@ -1,6 +1,8 @@
 import Foundation
 
-public protocol EditableGraphWrapper: ViewableGraphWrapper, EditableGraphBaseWrapper where InnerGraph: EditableGraph {
+public protocol EditableGraphWrapper: EditableGraphBaseWrapper
+where InnerGraph: EditableGraph
+{
 }
 
 public extension EditableGraphWrapper {

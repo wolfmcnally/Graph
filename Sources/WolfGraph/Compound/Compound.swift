@@ -9,7 +9,7 @@ import Foundation
 // node.
 //
 
-public struct Compound<InnerGraph, InnerTree>: ViewableCompound, ViewableGraphWrapper
+public struct Compound<InnerGraph, InnerTree>: EditableCompound, EditableGraphWrapper
 where InnerGraph: EditableGraph,
       InnerTree: EditableTree,
       InnerGraph.NodeID == InnerTree.NodeID,
@@ -42,7 +42,9 @@ where InnerGraph: EditableGraph,
     }
 }
 
-extension Compound: EditableCompound, EditableGraphWrapper
+// MARK: - EditableCompound Implementations
+
+extension Compound
 {
     /// Adding a node inserts it into both the graph and the tree, as a child of the specified `parent`.
     public mutating func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws {

@@ -1,7 +1,7 @@
 import Foundation
 
-public struct Tree<InnerGraph>: ViewableTree, ViewableGraphWrapper
-where InnerGraph: ViewableGraph
+public struct Tree<InnerGraph>: EditableTree, ViewableGraphWrapper
+where InnerGraph: EditableGraph
 {
     public typealias NodeID = InnerGraph.NodeID
     public typealias EdgeID = InnerGraph.EdgeID
@@ -20,8 +20,9 @@ where InnerGraph: ViewableGraph
     }
 }
 
-extension Tree: EditableTree
-where InnerGraph: EditableGraph
+// MARK: - EditableTree Implementations
+
+extension Tree
 {
     init(uncheckedInnerGraph: InnerGraph, root: NodeID) {
         self.graph = uncheckedInnerGraph

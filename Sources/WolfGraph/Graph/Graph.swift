@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Graph<NodeID, EdgeID, NodeData, EdgeData>
+public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: EditableGraph
 where NodeID: ElementID, EdgeID: ElementID
 {
     struct Node {
@@ -25,7 +25,9 @@ where NodeID: ElementID, EdgeID: ElementID
     public init() { }
 }
 
-extension Graph: ViewableGraph {
+// MARK: - ViewableGraph Implementations
+
+extension Graph {
     public var isEmpty: Bool {
         nodesCount == 0
     }
@@ -110,7 +112,9 @@ extension Graph: ViewableGraph {
     }
 }
 
-extension Graph: EditableGraph {
+// MARK: - EditableGraph Implementations
+
+extension Graph {
     public mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
         try checkHasNode(node)
         transform(&_nodes[node]!.data)

@@ -1,6 +1,9 @@
 import Foundation
 
-public protocol ViewableGraphWrapper: ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID, InnerGraph.NodeData == NodeData, InnerGraph.EdgeData == EdgeData {
+public protocol ViewableGraphWrapper: ViewableGraph
+where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID,
+      InnerGraph.NodeData == NodeData, InnerGraph.EdgeData == EdgeData
+{
     associatedtype InnerGraph: ViewableGraph
     
     var graph: InnerGraph { get }

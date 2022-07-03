@@ -1,12 +1,8 @@
 import Foundation
 
-public protocol EditableGraphBaseWrapper: EditableGraphBase
-where InnerGraph: EditableGraphBase,
-      NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
-      NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData
+public protocol EditableGraphBaseWrapper: EditableGraphBase, ViewableGraphWrapper
+where InnerGraph: EditableGraphBase
 {
-    associatedtype InnerGraph
-    
     var graph: InnerGraph { get set }
 }
 

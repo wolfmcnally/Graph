@@ -1,7 +1,7 @@
 import Foundation
 
-public struct DAG<InnerGraph>: ViewableDAG, ViewableGraphWrapper
-where InnerGraph: ViewableGraph
+public struct DAG<InnerGraph>: EditableDAG
+where InnerGraph: EditableGraph
 {
     public typealias NodeID = InnerGraph.NodeID
     public typealias EdgeID = InnerGraph.EdgeID
@@ -18,8 +18,7 @@ where InnerGraph: ViewableGraph
     }
 }
 
-extension DAG: EditableDAG, EditableGraphBase, EditableGraph, EditableGraphBaseWrapper, EditableGraphWrapper
-where InnerGraph: EditableGraph
+extension DAG: EditableGraphWrapper
 {
     public mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
         guard try canAddDAGEdge(from: tail, to: head) else {
