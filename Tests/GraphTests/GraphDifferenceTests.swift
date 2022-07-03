@@ -6,7 +6,7 @@ final class GraphDifferenceTests: XCTestCase {
         let aToB = b.difference(from: a)
         let b2 = try a.applyingDifference(aToB)
         XCTAssertEqual(b, b2)
-        return aToB.formattedList.trim()
+        return aToB.formattedList
     }
     
     func testTreeToGraph() throws {
