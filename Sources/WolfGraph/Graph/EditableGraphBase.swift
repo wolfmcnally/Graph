@@ -1,70 +1,80 @@
 import Foundation
 
-public protocol EditableGraphBase: ViewableGraph where InnerGraph: EditableGraph {
-    func copySettingInner(graph: InnerGraph) -> Self
+public protocol EditableGraphBase: ViewableGraph {
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws
+    mutating func setNodeData(_ node: NodeID, data: NodeData) throws
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws
+    mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
     
-    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self
-    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
-    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
-    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self
-    
-    func removeNode(_ node: NodeID) throws -> Self
-    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self
-    func removeEdge(_ edge: EdgeID) throws -> Self
-    func removeNodeEdges(_ node: NodeID) throws -> Self
-    func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self
+    mutating func removeNode(_ node: NodeID) throws
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws
+    mutating func removeEdge(_ edge: EdgeID) throws
+    mutating func removeNodeEdges(_ node: NodeID) throws
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws
 }
 
-public extension EditableGraphBase {
-    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
-        try copySettingInner(graph: graph.withNodeData(node, transform: transform))
-    }
-    
-    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self {
+extension EditableGraphBase {
+    public mutating func setNodeData(_ node: NodeID, data: NodeData) throws {
         try withNodeData(node) {
             $0 = data
         }
     }
 
-    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
-        try copySettingInner(graph: graph.withEdgeData(edge, transform: transform))
-    }
-    
-    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self {
+    public mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
         try withEdgeData(edge) {
             $0 = data
         }
     }
+}
 
-    func removeNode(_ node: NodeID) throws -> Self {
-        try copySettingInner(graph: graph.removeNode(node))
+public protocol EditableGraphBaseWrapper: EditableGraphBase
+where InnerGraph: EditableGraphBase,
+      NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
+      NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData
+{
+    associatedtype InnerGraph
+    
+    var graph: InnerGraph { get set }
+}
+
+public extension EditableGraphBaseWrapper {
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
+        try graph.withNodeData(node, transform: transform)
     }
 
-    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
-        try copySettingInner(graph: graph.newEdge(edge, tail: tail, head: head, data: data))
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws {
+        try graph.withEdgeData(edge, transform: transform)
     }
 
-    func removeEdge(_ edge: EdgeID) throws -> Self {
-        try copySettingInner(graph: graph.removeEdge(edge))
+    mutating func removeNode(_ node: NodeID) throws {
+        try graph.removeNode(node)
     }
 
-    func removeNodeEdges(_ node: NodeID) throws -> Self {
-        try copySettingInner(graph: graph.removeNodeEdges(node))
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
+        try graph.newEdge(edge, tail: tail, head: head, data: data)
+    }
+
+    mutating func removeEdge(_ edge: EdgeID) throws {
+        try graph.removeEdge(edge)
+    }
+
+    mutating func removeNodeEdges(_ node: NodeID) throws {
+        try graph.removeNodeEdges(node)
     }
     
-    func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
-        try copySettingInner(graph: graph.moveEdge(edge, newTail: newTail, newHead: newHead))
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
+        try graph.moveEdge(edge, newTail: newTail, newHead: newHead)
     }
 }
 
 public extension EditableGraphBase where EdgeData: DefaultConstructable {
-    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws {
         try newEdge(edge, tail: tail, head: head, data: EdgeData())
     }
 }
 
 public extension EditableGraphBase where EdgeData == Void {
-    func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws -> Self {
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws {
         try newEdge(edge, tail: tail, head: head, data: ())
     }
 }

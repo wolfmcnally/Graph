@@ -1,15 +1,16 @@
 import Foundation
 
-public protocol EditableCompound: ViewableCompound
-where InnerTree: EditableTree
+public protocol EditableCompound: ViewableCompound, EditableGraphBase
+where InnerGraph: EditableGraph, InnerTree: EditableTree
 {
-    func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws -> Self
+    mutating func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws
 }
 
 public extension EditableCompound
 where NodeData: DefaultConstructable
 {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
         try newNode(node, data: NodeData(), parent: parent, edge: edge)
     }
 }
@@ -17,7 +18,7 @@ where NodeData: DefaultConstructable
 public extension EditableCompound
 where NodeData == Void
 {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
         try newNode(node, data: (), parent: parent, edge: edge)
     }
 }

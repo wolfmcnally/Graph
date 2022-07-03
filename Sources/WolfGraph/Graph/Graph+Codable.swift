@@ -85,19 +85,19 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
         if NodeData.self == Empty.self {
             let nodes = try container.decode([NodeID].self, forKey: .nodes)
             try nodes.forEach {
-                graph = try graph.newNode($0)
+                try graph.newNode($0)
             }
         } else {
             let nodes = try container.decode(Dictionary<NodeID, EncodingNode>.self, forKey: .nodes)
             try nodes.forEach {
-                graph = try graph.newNode($0.key, data: $0.value.node.data)
+                try graph.newNode($0.key, data: $0.value.node.data)
             }
         }
 
         let edges = try container.decode(Dictionary<EdgeID, EncodingEdge>.self, forKey: .edges)
         try edges.forEach {
             let edge = $0.value.edge
-            graph = try graph.newEdge($0.key, tail: edge.tail, head: edge.head, data: edge.data)
+            try graph.newEdge($0.key, tail: edge.tail, head: edge.head, data: edge.data)
         }
         self = graph
     }

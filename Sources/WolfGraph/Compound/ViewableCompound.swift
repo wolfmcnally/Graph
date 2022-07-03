@@ -3,7 +3,10 @@ import Foundation
 public protocol ViewableCompound: ViewableTree
 where NodeID == InnerTree.NodeID, EdgeID == InnerTree.EdgeID
 {
+    associatedtype InnerGraph: ViewableGraph
     associatedtype InnerTree: ViewableTree
+    
+    var graph: InnerGraph { get }
     var tree: InnerTree { get }
 }
 

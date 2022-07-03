@@ -1,14 +1,10 @@
 import Foundation
 
-public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID, InnerGraph.NodeData == NodeData, InnerGraph.EdgeData == EdgeData {
+public protocol ViewableGraph  {
     associatedtype NodeID: ElementID
     associatedtype EdgeID: ElementID
     associatedtype NodeData
     associatedtype EdgeData
-
-    associatedtype InnerGraph: ViewableGraph
-    
-    var graph: InnerGraph { get }
     
     var isEmpty: Bool { get }
 
@@ -39,11 +35,13 @@ public protocol ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.Edge
     func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID)
 }
 
-public extension ViewableGraph {
-    var graph: Self {
-        self
-    }
+public protocol ViewableGraphWrapper: ViewableGraph where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID, InnerGraph.NodeData == NodeData, InnerGraph.EdgeData == EdgeData {
+    associatedtype InnerGraph: ViewableGraph
+    
+    var graph: InnerGraph { get }
+}
 
+public extension ViewableGraphWrapper {
     var isEmpty: Bool {
         graph.isEmpty
     }

@@ -1,50 +1,51 @@
 import Foundation
 import WolfBase
 
-public protocol EditableTree: ViewableTree where InnerGraph: EditableGraph
+public protocol EditableTree: ViewableTree
+where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
+      NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData
 {
-    func copySettingInner(graph: InnerGraph) -> Self
+    associatedtype InnerGraph: EditableGraph
+    var graph: InnerGraph { get set }
     
-    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self
-    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self
-    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self
-    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws
+    mutating func setNodeData(_ node: NodeID, data: NodeData) throws
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws
+    mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
 
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws -> Self
-    func removeNodeUngrouping(_ node: NodeID) throws -> Self
-    func removeNodeAndChildren(_ node: NodeID) throws -> Self
-    func moveNode(_ node: NodeID, newParent: NodeID) throws -> Self
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
+    mutating func removeNodeUngrouping(_ node: NodeID) throws
+    mutating func removeNodeAndChildren(_ node: NodeID) throws
+    mutating func moveNode(_ node: NodeID, newParent: NodeID) throws
 }
 
 public extension EditableTree {
-    func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
-        try copySettingInner(graph: graph.withNodeData(node, transform: transform))
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
+        try graph.withNodeData(node, transform: transform)
     }
     
-    func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
-        try copySettingInner(graph: graph.withEdgeData(edge, transform: transform))
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws {
+        try graph.withEdgeData(edge, transform: transform)
     }
     
-    func setNodeData(_ node: NodeID, data: NodeData) throws -> Self {
+    mutating func setNodeData(_ node: NodeID, data: NodeData) throws {
         try withNodeData(node) {
             $0 = data
         }
     }
     
-    func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self {
+    mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
         try withEdgeData(edge) {
             $0 = data
         }
     }
     
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws -> Self {
-        try copySettingInner(graph: graph
-            .newNode(node, data: nodeData)
-            .newEdge(edge, tail: parent, head: node, data: edgeData)
-        )
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws {
+        try graph.newNode(node, data: nodeData)
+        try graph.newEdge(edge, tail: parent, head: node, data: edgeData)
     }
 
-    func removeNodeUngrouping(_ node: NodeID) throws -> Self {
+    mutating func removeNodeUngrouping(_ node: NodeID) throws {
         // Can't remove root
         guard node != root else {
             throw GraphError.notATree
@@ -53,16 +54,13 @@ public extension EditableTree {
         // Promote children to the removed node's parent
         let newParent = try parent(node)!
         let children = try nodeSuccessors(node)
-        var copy = self
         for child in children {
-            copy = try copy.moveNode(child, newParent: newParent)
+            try moveNode(child, newParent: newParent)
         }
-        let innerCopy = try copy.graph.removeNode(node)
-        
-        return copySettingInner(graph: innerCopy)
+        try graph.removeNode(node)
     }
     
-    func removeNodeAndChildren(_ node: NodeID) throws -> Self {
+    mutating func removeNodeAndChildren(_ node: NodeID) throws {
         // Can't remove root
         guard node != root else {
             throw GraphError.notATree
@@ -70,60 +68,57 @@ public extension EditableTree {
 
         // Remove child nodes in reverse-topological sort order (most distant from the target first).
         let removeOrder = try! topologicalSort(roots: [node], rootsOnly: true, isSorted: false)
-        var innerCopy = self.graph
         for node in removeOrder {
-            innerCopy = try innerCopy.removeNode(node)
+            try graph.removeNode(node)
         }
-        
-        return copySettingInner(graph: innerCopy)
     }
 
-    func moveNode(_ node: NodeID, newParent: NodeID) throws -> Self {
+    mutating func moveNode(_ node: NodeID, newParent: NodeID) throws {
         // Can't move root
         guard node != root else {
             throw GraphError.notATree
         }
         
         let edge = try inEdge(node)!
-        guard try canMoveDAGEdge(edge, newTail: newParent, newHead: node) else {
+        guard try graph.canMoveDAGEdge(edge, newTail: newParent, newHead: node) else {
             throw GraphError.notATree
         }
-        return try copySettingInner(graph: graph.moveEdge(edge, newTail: newParent, newHead: node))
+        return try graph.moveEdge(edge, newTail: newParent, newHead: node)
     }
 }
 
 public extension EditableTree where NodeData: DefaultConstructable {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: edgeData)
     }
 }
 
 public extension EditableTree where NodeData == Void {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: edgeData)
     }
 }
 
 public extension EditableTree where EdgeData: DefaultConstructable {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: EdgeData())
     }
 }
 
 public extension EditableTree where EdgeData == Void {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: ())
     }
 }
 
 public extension EditableTree where NodeData: DefaultConstructable, EdgeData: DefaultConstructable {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: EdgeData())
     }
 }
 
 public extension EditableTree where NodeData == Void, EdgeData == Void {
-    func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws -> Self {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
         try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: ())
     }
 }

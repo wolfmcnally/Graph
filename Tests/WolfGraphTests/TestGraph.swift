@@ -1,25 +1,21 @@
 import Foundation
 import WolfGraph
 
-struct TestGraph: EditableGraph, Codable, Equatable {
+struct TestGraph: EditableGraph, EditableGraphWrapper, Codable, Equatable {
     typealias NodeID = String
     typealias EdgeID = String
     typealias NodeData = String
     typealias EdgeData = String
 
     typealias InnerGraph = Graph<NodeID, EdgeID, NodeData, EdgeData>
-    let graph: InnerGraph
+    var graph: InnerGraph
 
     init() {
         graph = InnerGraph()
     }
     
-    private init(graph: InnerGraph) {
+    init(graph: InnerGraph) {
         self.graph = graph
-    }
-    
-    func copySettingInner(graph: InnerGraph) -> Self {
-        Self(graph: graph)
     }
 
     init(edges: [(String, String, String)]) throws {
@@ -28,12 +24,12 @@ struct TestGraph: EditableGraph, Codable, Equatable {
         for edge in edges {
             let (label, tail, head) = edge
             if graph.hasNoNode(tail) {
-                graph = try graph.newNode(tail, data: tail)
+                try graph.newNode(tail, data: tail)
             }
             if graph.hasNoNode(head) {
-                graph = try graph.newNode(head, data: head)
+                try graph.newNode(head, data: head)
             }
-            graph = try graph.newEdge(label, tail: tail, head: head, data: label)
+            try graph.newEdge(label, tail: tail, head: head, data: label)
         }
         
         self.graph = graph

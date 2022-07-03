@@ -16,43 +16,41 @@ final class TreeTests: XCTestCase {
         }
 
         // Only a root? That's a tree.
-        g = try g.newNode("root")
+        try g.newNode("root")
         isATree()
 
         // Some other unconnected node? Not a tree.
-        g = try g.newNode("A")
+        try g.newNode("A")
         isNotATree()
         
         // Connect them? That's a tree.
-        g = try g.newEdge("rA", tail: "root", head: "A")
+        try g.newEdge("rA", tail: "root", head: "A")
         isATree()
         
         // Add another branch. Still a tree.
-        g = try g
-            .newNode("B")
-            .newEdge("rB", tail: "root", head: "B")
+        try g.newNode("B")
+        try g.newEdge("rB", tail: "root", head: "B")
         isATree()
         
         // ...But not if we start with a non-root.
         isNotATree(root: "A")
         
         // Add another level to the tree.
-        g = try g
-            .newNode("C")
-            .newNode("D")
-            .newNode("E")
-            .newNode("F")
-            .newEdge("AC", tail: "A", head: "C")
-            .newEdge("AD", tail: "A", head: "D")
-            .newEdge("BE", tail: "B", head: "E")
-            .newEdge("BF", tail: "B", head: "F")
+        try g.newNode("C")
+        try g.newNode("D")
+        try g.newNode("E")
+        try g.newNode("F")
+        try g.newEdge("AC", tail: "A", head: "C")
+        try g.newEdge("AD", tail: "A", head: "D")
+        try g.newEdge("BE", tail: "B", head: "E")
+        try g.newEdge("BF", tail: "B", head: "F")
         isATree()
         
         // Make a copy
         let undo = g
         
         // No cross-edges allowed
-        g = try g.newEdge("CE", tail: "C", head: "E")
+        try g.newEdge("CE", tail: "C", head: "E")
         isNotATree()
         
         // Restore from backup
@@ -60,7 +58,7 @@ final class TreeTests: XCTestCase {
         isATree()
         
         // No back-edges allowed
-        g = try g.newEdge("Cr", tail: "C", head: "root")
+        try g.newEdge("Cr", tail: "C", head: "root")
         isNotATree()
         
         // Restore from backup again
@@ -68,7 +66,7 @@ final class TreeTests: XCTestCase {
         isATree()
         
         // No multiple edges allowed
-        g = try g.newEdge("BE2", tail: "B", head: "E")
+        try g.newEdge("BE2", tail: "B", head: "E")
         isNotATree()
         
         // Back to a real tree

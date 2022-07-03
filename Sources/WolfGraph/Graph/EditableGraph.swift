@@ -1,23 +1,26 @@
 import Foundation
 
 public protocol EditableGraph: EditableGraphBase {
-    func newNode(_ node: NodeID, data: NodeData) throws -> Self
+    mutating func newNode(_ node: NodeID, data: NodeData) throws
 }
 
-public extension EditableGraph {
-    func newNode(_ node: NodeID, data: NodeData) throws -> Self {
-        try copySettingInner(graph: graph.newNode(node, data: data))
+public protocol EditableGraphWrapper: ViewableGraphWrapper, EditableGraphBaseWrapper where InnerGraph: EditableGraph {
+}
+
+public extension EditableGraphWrapper {
+    mutating func newNode(_ node: NodeID, data: NodeData) throws {
+        try graph.newNode(node, data: data)
     }
 }
 
-public extension EditableGraph where NodeData: DefaultConstructable {
-    func newNode(_ node: NodeID) throws -> Self {
-        try copySettingInner(graph: graph.newNode(node, data: NodeData()))
+public extension EditableGraphWrapper where NodeData: DefaultConstructable {
+    mutating func newNode(_ node: NodeID) throws {
+        try graph.newNode(node, data: NodeData())
     }
 }
 
-public extension EditableGraph where NodeData == Void {
-    func newNode(_ node: NodeID) throws -> Self {
-        try copySettingInner(graph: graph.newNode(node, data: ()))
+public extension EditableGraphWrapper where NodeData == Void {
+    mutating func newNode(_ node: NodeID) throws {
+        try graph.newNode(node, data: ())
     }
 }

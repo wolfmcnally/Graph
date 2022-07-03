@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Tree<InnerGraph>: ViewableTree
+public struct Tree<InnerGraph>: ViewableTree, ViewableGraphWrapper
 where InnerGraph: ViewableGraph
 {
     public typealias NodeID = InnerGraph.NodeID
@@ -9,7 +9,7 @@ where InnerGraph: ViewableGraph
     public typealias EdgeData = InnerGraph.EdgeData
     
     public let root: NodeID
-    public let graph: InnerGraph
+    public var graph: InnerGraph
     
     public init(graph: InnerGraph, root: NodeID) throws {
         guard try graph.isTree(root: root) else {

@@ -111,103 +111,97 @@ extension Graph: ViewableGraph {
 }
 
 extension Graph: EditableGraph {
-    public func copySettingInner(graph: Self) -> Self {
-        graph
-    }
-    
-    public func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws -> Self {
+    public mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
         try checkHasNode(node)
-        var copy = self
-        transform(&copy._nodes[node]!.data)
-        return copy
+        transform(&_nodes[node]!.data)
     }
 
-    public func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws -> Self {
+    public mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws {
         try checkHasEdge(edge)
-        var copy = self
-        transform(&copy._edges[edge]!.data)
-        return copy
+        transform(&_edges[edge]!.data)
     }
 
-    public func setEdgeData(_ edge: EdgeID, data: EdgeData) throws -> Self {
+    public mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
         try withEdgeData(edge) {
             $0 = data
         }
     }
-
-    public func newNode(_ node: NodeID, data: NodeData) throws -> Self {
+    
+    public mutating func newNode(_ node: NodeID, data: NodeData) throws {
         try checkHasNoNode(node)
-        var copy = self
-        copy._nodes[node] = Node(data: data)
-        return copy
+        _nodes[node] = Node(data: data)
     }
 
-    public func removeNode(_ node: NodeID) throws -> Self {
-        var copy = try removeNodeEdges(node)
-        copy._nodes.removeValue(forKey: node)
-        return copy
+    public mutating func removeNode(_ node: NodeID) throws {
+        try removeNodeEdges(node)
+        _nodes.removeValue(forKey: node)
     }
 
-    public func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws -> Self {
+    public mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
         try checkHasNoEdge(edge)
         try checkHasNode(tail)
         try checkHasNode(head)
         
-        var copy = self
-        copy._edges[edge] = Edge(tail: tail, head: head, data: data)
-        copy._nodes[tail]!.outEdges.insert(edge)
-        copy._nodes[head]!.inEdges.insert(edge)
-        return copy
+        _edges[edge] = Edge(tail: tail, head: head, data: data)
+        _nodes[tail]!.outEdges.insert(edge)
+        _nodes[head]!.inEdges.insert(edge)
     }
 
-    public func removeEdge(_ edge: EdgeID) throws -> Self {
+    public mutating func removeEdge(_ edge: EdgeID) throws {
         let e = try getEdge(edge)
-        var copy = self
-        copy._nodes[e.tail]!.outEdges.remove(edge)
-        copy._nodes[e.head]!.inEdges.remove(edge)
-        copy._edges.removeValue(forKey: edge)
-        return copy
+        _nodes[e.tail]!.outEdges.remove(edge)
+        _nodes[e.head]!.inEdges.remove(edge)
+        _edges.removeValue(forKey: edge)
     }
 
-    public func removeNodeEdges(_ node: NodeID) throws -> Self {
-        var copy = self
-        try nodeEdges(node).forEach {
-            copy = try! copy.removeEdge($0)
+    public mutating func removeNodeEdges(_ node: NodeID) throws {
+        let edges = try nodeEdges(node)
+        edges.forEach {
+            try! removeEdge($0)
         }
-        return copy
     }
     
-    public func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws -> Self {
+    public mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
         try checkHasNode(newTail)
         try checkHasNode(newHead)
         var e = try getEdge(edge)
         let oldTail = e.tail
         let oldHead = e.head
         guard oldTail != newTail || oldHead != newHead else {
-            return self
+            return
         }
         e.tail = newTail
         e.head = newHead
-        var copy = self
-        copy._edges[edge] = e
+        _edges[edge] = e
 
         if oldTail != newTail {
-            try copy.withNode(newTail) { node in
+            try withNode(newTail) { node in
                 node.outEdges.insert(edge)
             }
-            try copy.withNode(oldTail) { node in
+            try withNode(oldTail) { node in
                 node.outEdges.remove(edge)
             }
         }
         if oldHead != newHead {
-            try copy.withNode(newHead) { node in
+            try withNode(newHead) { node in
                 node.inEdges.insert(edge)
             }
-            try copy.withNode(oldHead) { node in
+            try withNode(oldHead) { node in
                 node.inEdges.remove(edge)
             }
         }
-        return copy
+    }
+}
+
+public extension Graph where NodeData: DefaultConstructable {
+    mutating func newNode(_ node: NodeID) throws {
+        try newNode(node, data: NodeData())
+    }
+}
+
+public extension Graph where NodeData == Void {
+    mutating func newNode(_ node: NodeID) throws {
+        try newNode(node, data: ())
     }
 }
 

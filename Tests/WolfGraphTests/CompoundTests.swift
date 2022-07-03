@@ -13,17 +13,17 @@ final class CompoundTests: XCTestCase {
         typealias MyCompound = Compound<CompoundGraph, CompoundTree>
         
         let root = "root"
-        let treeGraph = try TreeGraph()
-            .newNode(root)
+        var treeGraph = TreeGraph()
+        try treeGraph.newNode(root)
         let tree = try CompoundTree(graph: treeGraph, root: root)
         let compoundGraph = CompoundGraph()
         var compound = try MyCompound(graph: compoundGraph, tree: tree)
-        compound = try compound
-            .newNode("A", parent: "root", edge: "tree-rA")
-            .newNode("B", parent: "root", edge: "tree-rB")
-            .newNode("C", parent: "root", edge: "tree-rC")
-            .newNode("D", parent: "C", edge: "tree-CD")
-            .newEdge("AB", tail: "A", head: "B")
+        try compound.newNode("A", parent: "root", edge: "tree-rA")
+        try compound.newNode("B", parent: "root", edge: "tree-rB")
+        try compound.newNode("C", parent: "root", edge: "tree-rC")
+        try compound.newNode("D", parent: "C", edge: "tree-CD")
+        try compound.newEdge("AB", tail: "A", head: "B")
+
         let json = #"{"graph":{"edges":{"AB":["A","B",""]},"nodes":{"A":"","B":"","C":"","D":""}},"tree":{"edges":{"tree-CD":["C","D"],"tree-rA":["root","A"],"tree-rB":["root","B"],"tree-rC":["root","C"]},"nodes":["A","B","C","D","root"],"root":"root"}}"#
         XCTAssertEqual(compound.jsonString, json)
     }
@@ -40,11 +40,12 @@ final class CompoundTests: XCTestCase {
         typealias MyCompound = Compound<CompoundDAG, CompoundTree>
         
         let root = "root"
-        let treeGraph = try TreeGraph().newNode("root")
+        var treeGraph = TreeGraph()
+        try treeGraph.newNode("root")
         var tree = try CompoundTree(graph: treeGraph, root: root)
         let compoundDAG = try CompoundDAG(graph: TestGraph.makeDAG())
         for node in compoundDAG.nodes {
-            tree = try tree.newNode(node, parent: "root", edge: "r\(node)")
+            try tree.newNode(node, parent: "root", edge: "r\(node)")
         }
         let compound = try MyCompound(graph: compoundDAG, tree: tree)
         let json = #"{"graph":{"edges":{"AC":["A","C","AC"],"AD":["A","D","AD"],"AE":["A","E","AE"],"BA":["B","A","BA"],"BC":["B","C","BC"],"BG":["B","G","BG"],"CD":["C","D","CD"],"ED":["E","D","ED"],"FD":["F","D","FD"],"FE":["F","E","FE"],"GI":["I","G","GI"],"HJ":["H","J","HJ"],"IB":["B","I","IB"],"IC":["I","C","IC"],"IK":["I","K","IK"],"JA":["J","A","JA"],"JE":["J","E","JE"],"JF":["J","F","JF"]},"nodes":{"A":"A","B":"B","C":"C","D":"D","E":"E","F":"F","G":"G","H":"H","I":"I","J":"J","K":"K"}},"tree":{"edges":{"rA":["root","A"],"rB":["root","B"],"rC":["root","C"],"rD":["root","D"],"rE":["root","E"],"rF":["root","F"],"rG":["root","G"],"rH":["root","H"],"rI":["root","I"],"rJ":["root","J"],"rK":["root","K"]},"nodes":["A","B","C","D","E","F","G","H","I","J","K","root"],"root":"root"}}"#
