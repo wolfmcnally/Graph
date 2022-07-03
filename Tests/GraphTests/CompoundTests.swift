@@ -1,5 +1,5 @@
 import XCTest
-import WolfGraph
+import Graph
 
 final class CompoundTests: XCTestCase {
     func testCompoundGraph() throws {

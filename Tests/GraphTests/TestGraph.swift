@@ -1,5 +1,5 @@
 import Foundation
-import WolfGraph
+import Graph
 
 struct TestGraph: EditableGraph, EditableGraphWrapper, Codable, Equatable {
     typealias NodeID = String

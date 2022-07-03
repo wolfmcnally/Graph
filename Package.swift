@@ -3,22 +3,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "WolfGraph",
+    name: "Graph",
     platforms: [.macOS(.v12), .iOS(.v15)],
     products: [
         .library(
-            name: "WolfGraph",
-            targets: ["WolfGraph"]),
+            name: "Graph",
+            targets: ["Graph"]),
     ],
     dependencies: [
         .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0")),
     ],
     targets: [
         .target(
-            name: "WolfGraph",
+            name: "Graph",
             dependencies: ["WolfBase"]),
         .testTarget(
-            name: "WolfGraphTests",
-            dependencies: ["WolfGraph"]),
+            name: "GraphTests",
+            dependencies: ["Graph"]),
     ]
 )

@@ -1,5 +1,5 @@
 import XCTest
-import WolfGraph
+import Graph
 
 final class DAGTests: XCTestCase {
     func testDAGCodable() throws {

@@ -1,5 +1,5 @@
 import XCTest
-import WolfGraph
+import Graph
 
 final class DepthFirstSearchTests: XCTestCase {
     func testDepthFirstSearch() throws {

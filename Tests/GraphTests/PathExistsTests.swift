@@ -1,5 +1,5 @@
 import XCTest
-import WolfGraph
+import Graph
 
 final class PathExistsTests: XCTestCase {
     func testPathExists() throws {
