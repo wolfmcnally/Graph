@@ -32,3 +32,9 @@ public extension DFSVisitor {
     func forwardOrCrosseEdge(_ edge: EdgeID) throws -> Result? { nil }
     func finishEdge(_ edge: EdgeID) throws -> Result? { nil }
 }
+
+public extension DFSVisitor where Result == Void {
+    func finish() -> Result {
+        return ()
+    }
+}

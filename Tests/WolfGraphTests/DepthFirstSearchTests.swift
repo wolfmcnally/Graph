@@ -60,9 +60,6 @@ final class DepthFirstSearchTests: XCTestCase {
                 finishedEdges.append(edge)
                 return nil
             }
-            
-            func finish() -> Void {
-            }
         }
         
         let graph = try TestGraph(edges: [

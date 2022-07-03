@@ -38,7 +38,4 @@ fileprivate class TopologicalSortVisitor<Graph: ViewableGraph>: DFSVisitor {
         nodes.append(node)
         return nil
     }
-    
-    func finish() -> () {
-    }
 }
