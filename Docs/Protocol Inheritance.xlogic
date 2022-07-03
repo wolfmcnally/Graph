@@ -120,7 +120,7 @@
                             </attribute>
                         </attributes>
                     </vertex>
-                    <vertex eid="6" outEdgeOrder="7 12">
+                    <vertex eid="6" inEdgeOrder="11 49" outEdgeOrder="7 12">
                         <attributes>
                             <attribute class="java.lang.String" key="type">entity</attribute>
                             <attribute class="java.lang.String" key="title">EditableGraphBaseWrapper</attribute>
@@ -150,7 +150,7 @@
                             </attribute>
                         </attributes>
                     </vertex>
-                    <vertex eid="10" inEdgeOrder="38 49">
+                    <vertex eid="10">
                         <attributes>
                             <attribute class="java.lang.String" key="type">entity</attribute>
                             <attribute class="java.lang.String" key="title">EditableGraphWrapper</attribute>
@@ -557,7 +557,7 @@
                             </attribute>
                         </attributes>
                     </edge>
-                    <edge eid="49" source="45" target="10">
+                    <edge eid="49" source="45" target="6">
                         <attributes>
                             <attribute class="java.lang.Double" key="weight">1.0</attribute>
                             <attribute class="com.flyinglogic.logicgraph.operator.MultiplyEdgeOperator" key="forwardOperator">

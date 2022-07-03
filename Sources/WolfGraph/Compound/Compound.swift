@@ -9,7 +9,7 @@ import Foundation
 // node.
 //
 
-public struct Compound<InnerGraph, InnerTree>: EditableCompound, EditableGraphWrapper
+public struct Compound<InnerGraph, InnerTree>: EditableCompound, EditableGraphBaseWrapper
 where InnerGraph: EditableGraph,
       InnerTree: EditableTree,
       InnerGraph.NodeID == InnerTree.NodeID,
