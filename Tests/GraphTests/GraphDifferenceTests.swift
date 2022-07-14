@@ -1,5 +1,5 @@
 import XCTest
-import WolfGraph
+import Graph
 
 final class GraphDifferenceTests: XCTestCase {
     func diffTest(from a: TestGraph, to b: TestGraph) throws -> String {
