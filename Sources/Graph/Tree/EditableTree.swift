@@ -8,9 +8,9 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
     associatedtype InnerGraph: EditableGraph
     var graph: InnerGraph { get set }
     
-    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws
     mutating func setNodeData(_ node: NodeID, data: NodeData) throws
-    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
 
     mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
@@ -20,11 +20,11 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
 }
 
 public extension EditableTree {
-    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws {
         try graph.withNodeData(node, transform: transform)
     }
     
-    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws {
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws {
         try graph.withEdgeData(edge, transform: transform)
     }
     

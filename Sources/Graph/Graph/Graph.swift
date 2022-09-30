@@ -115,14 +115,14 @@ extension Graph {
 // MARK: - EditableGraph Implementations
 
 extension Graph {
-    public mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws {
+    public mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws {
         try checkHasNode(node)
-        transform(&_nodes[node]!.data)
+        try transform(&_nodes[node]!.data)
     }
 
-    public mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws {
+    public mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws {
         try checkHasEdge(edge)
-        transform(&_edges[edge]!.data)
+        try transform(&_edges[edge]!.data)
     }
 
     public mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {

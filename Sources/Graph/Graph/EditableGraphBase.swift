@@ -1,9 +1,9 @@
 import Foundation
 
 public protocol EditableGraphBase: ViewableGraph {
-    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) -> Void) throws
+    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws
     mutating func setNodeData(_ node: NodeID, data: NodeData) throws
-    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) -> Void) throws
+    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
     
     mutating func removeNode(_ node: NodeID) throws
