@@ -3,15 +3,15 @@ import Graph
 
 final class GraphTests: XCTestCase {
     func testCodableData() throws {
-        typealias MyGraph = Graph<Int, Int, String, String>
-        var graph = MyGraph()
+        typealias MyGraph = Graph<Int, Int, String, String, String>
+        var graph = MyGraph(data: "Graph")
         try graph.newNode(101, data: "A")
         try graph.newNode(102, data: "B")
         try graph.newNode(103, data: "C")
         try graph.newNode(104, data: "D")
         try graph.newEdge(1, tail: 101, head: 102, data: "AB")
         try graph.newEdge(2, tail: 101, head: 103, data: "AC")
-        let json = #"{"edges":{"1":[101,102,"AB"],"2":[101,103,"AC"]},"nodes":{"101":"A","102":"B","103":"C","104":"D"}}"#
+        let json = #"{"data":"Graph","edges":{"1":[101,102,"AB"],"2":[101,103,"AC"]},"nodes":{"101":"A","102":"B","103":"C","104":"D"}}"#
         XCTAssertEqual(graph.jsonString, json)
         let graph2 = try MyGraph.fromJSON(json)
         XCTAssertEqual(graph, graph2)
@@ -19,7 +19,7 @@ final class GraphTests: XCTestCase {
     }
 
     func testDefaultData() throws {
-        typealias MyGraph = Graph<Int, Int, String, String>
+        typealias MyGraph = Graph<Int, Int, String, String, String>
         var graph = MyGraph()
         try graph.newNode(101)
         try graph.newNode(102)
@@ -27,7 +27,8 @@ final class GraphTests: XCTestCase {
         try graph.newNode(104)
         try graph.newEdge(1, tail: 101, head: 102)
         try graph.newEdge(2, tail: 101, head: 103)
-        let json = #"{"edges":{"1":[101,102,""],"2":[101,103,""]},"nodes":{"101":"","102":"","103":"","104":""}}"#
+        print(graph.jsonString)
+        let json = #"{"data":"","edges":{"1":[101,102,""],"2":[101,103,""]},"nodes":{"101":"","102":"","103":"","104":""}}"#
         XCTAssertEqual(graph.jsonString, json)
         let graph2 = try MyGraph.fromJSON(json)
         XCTAssertEqual(graph, graph2)
@@ -36,7 +37,7 @@ final class GraphTests: XCTestCase {
 
     func testVoidData() throws {
         /// Because the node and edge data types are `Void`, the graph is not `Codable` or `Equatable`
-        typealias MyGraph = Graph<Int, Int, Void, Void>
+        typealias MyGraph = Graph<Int, Int, Void, Void, Void>
         var graph = MyGraph()
         try graph.newNode(101)
         try graph.newNode(102)
@@ -49,7 +50,7 @@ final class GraphTests: XCTestCase {
     }
 
     func testEmptyData() throws {
-        typealias MyGraph = Graph<Int, Int, Empty, Empty>
+        typealias MyGraph = Graph<Int, Int, Empty, Empty, Empty>
         var graph = MyGraph()
         try graph.newNode(101)
         try graph.newNode(102)

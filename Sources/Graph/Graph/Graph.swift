@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Graph<NodeID, EdgeID, NodeData, EdgeData>: EditableGraph
+public struct Graph<NodeID, EdgeID, NodeData, EdgeData, GraphData>: EditableGraph
 where NodeID: ElementID, EdgeID: ElementID
 {
     struct Node {
@@ -21,8 +21,23 @@ where NodeID: ElementID, EdgeID: ElementID
     
     var _nodes: [NodeID: Node] = [:]
     var _edges: [EdgeID: Edge] = [:]
+    var data: GraphData
     
-    public init() { }
+    public init(data: GraphData) {
+        self.data = data
+    }
+}
+
+extension Graph where GraphData == Void {
+    public init() {
+        self.init(data: ())
+    }
+}
+
+extension Graph where GraphData: DefaultConstructable {
+    public init() {
+        self.init(data: GraphData())
+    }
 }
 
 // MARK: - ViewableGraph Implementations

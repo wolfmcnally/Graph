@@ -7,9 +7,9 @@ final class CompoundTests: XCTestCase {
         typealias EdgeID = String
         typealias NodeData = String
         typealias EdgeData = String
-        typealias TreeGraph = Graph<NodeID, EdgeID, Empty, Empty>
+        typealias TreeGraph = Graph<NodeID, EdgeID, Empty, Empty, Empty>
         typealias CompoundTree = Tree<TreeGraph>
-        typealias CompoundGraph = Graph<NodeID, EdgeID, NodeData, EdgeData>
+        typealias CompoundGraph = Graph<NodeID, EdgeID, NodeData, EdgeData, Empty>
         typealias MyCompound = Compound<CompoundGraph, CompoundTree>
         
         let root = "root"
@@ -34,7 +34,7 @@ final class CompoundTests: XCTestCase {
         typealias NodeData = TestGraph.NodeData
         typealias EdgeData = TestGraph.EdgeData
 
-        typealias TreeGraph = Graph<NodeID, EdgeID, Empty, Empty>
+        typealias TreeGraph = Graph<NodeID, EdgeID, Empty, Empty, Empty>
         typealias CompoundTree = Tree<TreeGraph>
         typealias CompoundDAG = DAG<TestGraph>
         typealias MyCompound = Compound<CompoundDAG, CompoundTree>

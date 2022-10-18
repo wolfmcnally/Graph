@@ -6,8 +6,9 @@ struct TestGraph: EditableGraph, EditableGraphWrapper, Codable, Equatable {
     typealias EdgeID = String
     typealias NodeData = String
     typealias EdgeData = String
+    typealias GraphData = Empty
 
-    typealias InnerGraph = Graph<NodeID, EdgeID, NodeData, EdgeData>
+    typealias InnerGraph = Graph<NodeID, EdgeID, NodeData, EdgeData, GraphData>
     var graph: InnerGraph
 
     init() {

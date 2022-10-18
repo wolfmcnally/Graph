@@ -1,8 +1,9 @@
 import Foundation
 import WolfBase
 
-extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable {
+extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable, GraphData: Codable & DefaultConstructable {
     enum CodingKeys: CodingKey {
+        case data
         case edges
         case nodes
     }
@@ -59,6 +60,10 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
+        if GraphData.self != Empty.self {
+            try container.encode(data, forKey: .data)
+        }
+        
         if NodeData.self == Empty.self {
             let nodes: [NodeID] = _nodes.reduce(into: []) { result, element in
                 result.append(element.key)
@@ -81,6 +86,10 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         var graph = Self()
+        
+        if GraphData.self != Empty.self {
+            graph.data = try container.decode(GraphData.self, forKey: .data)
+        }
 
         if NodeData.self == Empty.self {
             let nodes = try container.decode([NodeID].self, forKey: .nodes)

@@ -3,7 +3,7 @@ import Graph
 
 final class TreeTests: XCTestCase {
     func testIsTree() throws {
-        typealias G = Graph<String, String, Empty, Empty>
+        typealias G = Graph<String, String, Empty, Empty, Empty>
         
         var g = G()
 
