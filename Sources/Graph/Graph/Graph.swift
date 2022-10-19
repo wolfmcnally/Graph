@@ -21,7 +21,7 @@ where NodeID: ElementID, EdgeID: ElementID
     
     var _nodes: [NodeID: Node] = [:]
     var _edges: [EdgeID: Edge] = [:]
-    var data: GraphData
+    public var data: GraphData
     
     public init(data: GraphData) {
         self.data = data
