@@ -5,6 +5,7 @@ public protocol ViewableGraph  {
     associatedtype EdgeID: ElementID
     associatedtype NodeData
     associatedtype EdgeData
+    associatedtype GraphData
     
     var isEmpty: Bool { get }
 
@@ -21,6 +22,7 @@ public protocol ViewableGraph  {
 
     func nodeData(_ node: NodeID) throws -> NodeData
     func edgeData(_ edge: EdgeID) throws -> EdgeData
+    var data: GraphData { get }
 
     func nodeOutEdges(_ node: NodeID) throws -> [EdgeID]
     func nodeInEdges(_ node: NodeID) throws -> [EdgeID]
@@ -33,4 +35,16 @@ public protocol ViewableGraph  {
     func edgeHead(_ edge: EdgeID) throws -> NodeID
     func edgeTail(_ edge: EdgeID) throws -> NodeID
     func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID)
+}
+
+public extension ViewableGraph where GraphData == Empty {
+    var data: Empty {
+        Empty()
+    }
+}
+
+public extension ViewableGraph where GraphData == Void {
+    var data: Void {
+        ()
+    }
 }

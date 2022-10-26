@@ -18,6 +18,11 @@ where InnerGraph: EditableGraph
         self.graph = graph
         self.root = root
     }
+    
+    public var data: InnerGraph.GraphData {
+        get { graph.data }
+        set { graph.data = newValue }
+    }
 }
 
 // MARK: - EditableTree Implementations

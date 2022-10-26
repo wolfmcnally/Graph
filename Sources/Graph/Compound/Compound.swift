@@ -40,6 +40,11 @@ where InnerGraph: EditableGraph,
     public var root: NodeID {
         tree.root
     }
+    
+    public var data: InnerGraph.GraphData {
+        get { graph.data }
+        set { graph.data = newValue }
+    }
 }
 
 // MARK: - EditableCompound Implementations

@@ -11,6 +11,7 @@ public protocol EditableGraphBase: ViewableGraph {
     mutating func removeEdge(_ edge: EdgeID) throws
     mutating func removeNodeEdges(_ node: NodeID) throws
     mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws
+    var data: GraphData { get set }
 }
 
 extension EditableGraphBase {
@@ -36,5 +37,19 @@ public extension EditableGraphBase where EdgeData: DefaultConstructable {
 public extension EditableGraphBase where EdgeData == Void {
     mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID) throws {
         try newEdge(edge, tail: tail, head: head, data: ())
+    }
+}
+
+public extension EditableGraphBase where GraphData == Empty {
+    var data: Empty {
+        get { Empty() }
+        set { }
+    }
+}
+
+public extension EditableGraphBase where GraphData == Void {
+    var data: Void {
+        get { () }
+        set { }
     }
 }

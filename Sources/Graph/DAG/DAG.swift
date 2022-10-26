@@ -7,7 +7,8 @@ where InnerGraph: EditableGraph
     public typealias EdgeID = InnerGraph.EdgeID
     public typealias NodeData = InnerGraph.NodeData
     public typealias EdgeData = InnerGraph.EdgeData
-    
+    public typealias GraphData = InnerGraph.GraphData
+
     public var graph: InnerGraph
     
     public init(graph: InnerGraph) throws {
@@ -15,6 +16,11 @@ where InnerGraph: EditableGraph
             throw GraphError.notADAG
         }
         self.graph = graph
+    }
+
+    public var data: InnerGraph.GraphData {
+        get { graph.data }
+        set { graph.data = newValue }
     }
 }
 
