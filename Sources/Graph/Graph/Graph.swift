@@ -130,14 +130,16 @@ extension Graph {
 // MARK: - EditableGraph Implementations
 
 extension Graph {
-    public mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws {
+    @discardableResult
+    public mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T {
         try checkHasNode(node)
-        try transform(&_nodes[node]!.data)
+        return try transform(&_nodes[node]!.data)
     }
 
-    public mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws {
+    @discardableResult
+    public mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
         try checkHasEdge(edge)
-        try transform(&_edges[edge]!.data)
+        return try transform(&_edges[edge]!.data)
     }
 
     public mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
@@ -263,11 +265,13 @@ private extension Graph {
         return result
     }
     
-    mutating func withNode(_ node: NodeID, transform: (inout Node) throws -> Void) throws {
+    @discardableResult
+    mutating func withNode<T>(_ node: NodeID, transform: (inout Node) throws -> T) throws -> T {
         try transform(&_nodes[node]!)
     }
     
-    mutating func withEdge(_ edge: EdgeID, transform: (inout Edge) throws -> Void) throws {
+    @discardableResult
+    mutating func withEdge<T>(_ edge: EdgeID, transform: (inout Edge) throws -> T) throws -> T {
         try transform(&_edges[edge]!)
     }
 }

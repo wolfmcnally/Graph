@@ -7,11 +7,11 @@ where InnerGraph: EditableGraphBase
 }
 
 public extension EditableGraphBaseWrapper {
-    mutating func withNodeData(_ node: NodeID, transform: (inout NodeData) throws -> Void) throws {
+    mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T {
         try graph.withNodeData(node, transform: transform)
     }
 
-    mutating func withEdgeData(_ edge: EdgeID, transform: (inout EdgeData) throws -> Void) throws {
+    mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
         try graph.withEdgeData(edge, transform: transform)
     }
 
