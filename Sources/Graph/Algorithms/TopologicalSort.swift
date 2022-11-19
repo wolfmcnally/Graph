@@ -1,16 +1,17 @@
 import Foundation
 import WolfBase
+import SortedCollections
 
 public extension ViewableGraph {
-    func topologicalSort(roots: [NodeID] = [], rootsOnly: Bool = false, isSorted: Bool = true) throws -> [NodeID] {
+    func topologicalSort(roots: SortedSet<NodeID> = [], rootsOnly: Bool = false) throws -> [NodeID] {
         let visitor = TopologicalSortVisitor<Self>(capacity: nodesCount)
-        try depthFirstSearch(visitor, roots: roots, rootsOnly: rootsOnly, isSorted: isSorted)
+        try depthFirstSearch(visitor, roots: roots, rootsOnly: rootsOnly)
         return visitor.nodes
     }
     
     func isDAG() throws -> Bool {
         do {
-            _ = try topologicalSort(isSorted: false)
+            _ = try topologicalSort()
         } catch GraphError.notADAG {
             return false
         } catch {

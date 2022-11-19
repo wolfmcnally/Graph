@@ -1,11 +1,22 @@
 import Foundation
+import SortedCollections
 
 public struct Graph<NodeID, EdgeID, NodeData, EdgeData, GraphData>: EditableGraph
 where NodeID: ElementID, EdgeID: ElementID
 {
+    // These should be replaced with SortedDictionary from Swift Collections when it's ready
+    var _nodes: SortedDictionary<NodeID, Node> = [:]
+    var _edges: SortedDictionary<EdgeID, Edge> = [:]
+    public var data: GraphData
+    
+    public init(data: GraphData) {
+        self.data = data
+    }
+
     struct Node {
-        var inEdges: Set<EdgeID> = []
-        var outEdges: Set<EdgeID> = []
+        // These should be replaced with SortedSet from Swift Collections when it's ready
+        var inEdges: SortedSet<EdgeID> = []
+        var outEdges: SortedSet<EdgeID> = []
         var data: NodeData
         
         init(data: NodeData) {
@@ -17,14 +28,6 @@ where NodeID: ElementID, EdgeID: ElementID
         var tail: NodeID
         var head: NodeID
         var data: EdgeData
-    }
-    
-    var _nodes: [NodeID: Node] = [:]
-    var _edges: [EdgeID: Edge] = [:]
-    public var data: GraphData
-    
-    public init(data: GraphData) {
-        self.data = data
     }
 }
 
@@ -55,12 +58,12 @@ extension Graph {
         _edges.count
     }
 
-    public var nodes: [NodeID] {
-        Array(_nodes.keys).sorted()
+    public var nodes: SortedSet<NodeID> {
+        SortedSet(_nodes.keys)
     }
     
-    public var edges: [EdgeID] {
-        Array(_edges.keys).sorted()
+    public var edges: SortedSet<EdgeID> {
+        SortedSet(_edges.keys)
     }
     
     public func hasNode(_ node: NodeID) -> Bool {
@@ -87,30 +90,30 @@ extension Graph {
         try getEdge(edge).data
     }
 
-    public func nodeOutEdges(_ node: NodeID) throws -> [EdgeID] {
-        try getNode(node).outEdges.sorted()
+    public func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
+        try getNode(node).outEdges
     }
     
-    public func nodeInEdges(_ node: NodeID) throws -> [EdgeID] {
-        try getNode(node).inEdges.sorted()
+    public func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
+        try getNode(node).inEdges
     }
     
-    public func nodeEdges(_ node: NodeID) throws -> [EdgeID] {
-        try Array(Set(nodeOutEdges(node)).union(Set(nodeInEdges(node)))).sorted()
+    public func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
+        try nodeOutEdges(node).union(nodeInEdges(node))
     }
     
-    public func nodeSuccessors(_ node: NodeID) throws -> [NodeID] {
-        try nodeOutEdges(node).map(edgeHead).sorted()
+    public func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> {
+        try SortedSet(nodeOutEdges(node).map(edgeHead))
     }
     
-    public func nodePredecessors(_ node: NodeID) throws -> [NodeID] {
-        try nodeInEdges(node).map(edgeTail).sorted()
+    public func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> {
+        try SortedSet(nodeInEdges(node).map(edgeTail))
     }
     
-    public func nodeNeighbors(_ node: NodeID) throws -> [NodeID] {
+    public func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID> {
         let successors = try nodeSuccessors(node)
         let predececessors = try nodePredecessors(node)
-        return Array(Set(successors).union(Set(predececessors))).sorted()
+        return successors.union(predececessors)
     }
     
     public func edgeHead(_ edge: EdgeID) throws -> NodeID {

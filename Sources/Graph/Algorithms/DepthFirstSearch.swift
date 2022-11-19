@@ -1,4 +1,5 @@
 import Foundation
+import SortedCollections
 
 fileprivate enum State {
     case discovered
@@ -6,7 +7,7 @@ fileprivate enum State {
 }
 
 public extension ViewableGraph {
-    func depthFirstSearch<Visitor, Result>(_ visitor: Visitor, roots: [NodeID] = [], rootsOnly: Bool = false, isSorted: Bool = true, excludedEdge: EdgeID? = nil) throws -> Result
+    func depthFirstSearch<Visitor, Result>(_ visitor: Visitor, roots: SortedSet<NodeID> = [], rootsOnly: Bool = false, excludedEdge: EdgeID? = nil) throws -> Result
     where Visitor: DFSVisitor, Visitor.Graph == Self, Result == Visitor.Result
     {
         for node in nodes {
@@ -17,13 +18,13 @@ public extension ViewableGraph {
         
         var states: [NodeID: State] = [:]
         
-        for root in roots.sortedIf(isSorted) {
+        for root in roots {
             if let result = try searchFromRoot(root) {
                 return result
             }
         }
         if !rootsOnly {
-            for node in nodes.sortedIf(isSorted) {
+            for node in nodes {
                 if let result = try searchFromRoot(node) {
                     return result
                 }
@@ -48,8 +49,7 @@ public extension ViewableGraph {
                 .filter {
                     $0 != excludedEdge
                 }
-                .sortedIf(isSorted)
-            var stack: [(NodeID, EdgeID?, [EdgeID])] = []
+            var stack: [(NodeID, EdgeID?, SortedSet<EdgeID>)] = []
             stack.append((root, nil, outEdges))
             while let (tail, finishedEdge, remainingOutEdges) = stack.popLast() {
                 var tail = tail
@@ -77,7 +77,7 @@ public extension ViewableGraph {
                         if let result = try visitor.discoverNode(tail) {
                             return result
                         }
-                        remainingOutEdges = try nodeOutEdges(tail).sortedIf(isSorted)
+                        remainingOutEdges = try nodeOutEdges(tail)
                     case .discovered:
                         if let result = try visitor.backEdge(edge) {
                             return result

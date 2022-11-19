@@ -4,7 +4,7 @@ import WolfBase
 public extension ViewableGraph {
     func pathExists(from: NodeID, to: NodeID, excludedEdge: EdgeID? = nil) throws -> Bool {
         let visitor = PathExistsVisitor<Self>(from: from, to: to)
-        return try depthFirstSearch(visitor, roots: [from], rootsOnly: false, isSorted: false, excludedEdge: excludedEdge)
+        return try depthFirstSearch(visitor, roots: [from], rootsOnly: false, excludedEdge: excludedEdge)
     }
     
     func canAddDAGEdge(from: NodeID, to: NodeID, excludedEdge: EdgeID? = nil) throws -> Bool {

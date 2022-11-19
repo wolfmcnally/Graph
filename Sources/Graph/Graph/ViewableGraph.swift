@@ -1,4 +1,5 @@
 import Foundation
+import SortedCollections
 
 public protocol ViewableGraph  {
     associatedtype NodeID: ElementID
@@ -12,8 +13,8 @@ public protocol ViewableGraph  {
     var nodesCount: Int { get }
     var edgesCount: Int { get }
 
-    var nodes: [NodeID] { get }
-    var edges: [EdgeID] { get }
+    var nodes: SortedSet<NodeID> { get }
+    var edges: SortedSet<EdgeID> { get }
 
     func hasNode(_ node: NodeID) -> Bool
     func hasNoNode(_ node: NodeID) -> Bool
@@ -24,13 +25,13 @@ public protocol ViewableGraph  {
     func edgeData(_ edge: EdgeID) throws -> EdgeData
     var data: GraphData { get }
 
-    func nodeOutEdges(_ node: NodeID) throws -> [EdgeID]
-    func nodeInEdges(_ node: NodeID) throws -> [EdgeID]
-    func nodeEdges(_ node: NodeID) throws -> [EdgeID]
+    func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
+    func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
+    func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
 
-    func nodeSuccessors(_ node: NodeID) throws -> [NodeID]
-    func nodePredecessors(_ node: NodeID) throws -> [NodeID]
-    func nodeNeighbors(_ node: NodeID) throws -> [NodeID]
+    func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID>
+    func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID>
+    func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID>
 
     func edgeHead(_ edge: EdgeID) throws -> NodeID
     func edgeTail(_ edge: EdgeID) throws -> NodeID

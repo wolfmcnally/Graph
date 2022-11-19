@@ -1,4 +1,5 @@
 import Foundation
+import SortedCollections
 
 public enum GraphMutation<G: ViewableGraph> {
     public typealias NodeID = G.NodeID
@@ -71,14 +72,14 @@ public extension ViewableGraph {
           NodeData == G.NodeData, EdgeData == G.EdgeData,
           NodeData: Equatable, EdgeData: Equatable
     {
-        let startNodes = Set(other.nodes)
-        let endNodes = Set(nodes)
+        let startNodes = SortedSet(other.nodes)
+        let endNodes = SortedSet(nodes)
         
-        let enteringNodes: [NodeID: NodeData] = endNodes.subtracting(startNodes).reduce(into: .init()) { result, node in
+        let enteringNodes: SortedDictionary<NodeID, NodeData> = endNodes.subtracting(startNodes).reduce(into: .init()) { result, node in
             result[node] = try! nodeData(node)
         }
         let exitingNodes = startNodes.subtracting(endNodes)
-        let updatingNodes: [NodeID: NodeData] = startNodes.intersection(endNodes).reduce(into: .init()) { result, node in
+        let updatingNodes: SortedDictionary<NodeID, NodeData> = startNodes.intersection(endNodes).reduce(into: .init()) { result, node in
             let selfData = try! nodeData(node)
             let otherData = try! other.nodeData(node)
             if selfData != otherData {
@@ -86,22 +87,22 @@ public extension ViewableGraph {
             }
         }
         
-        let startEdges = Set(other.edges)
-        let endEdges = Set(edges)
+        let startEdges = other.edges
+        let endEdges = edges
         
-        let enteringEdges: [EdgeID: (NodeID, NodeID, EdgeData)] = endEdges.subtracting(startEdges).reduce(into: .init()) { result, edge in
+        let enteringEdges: SortedDictionary<EdgeID, (NodeID, NodeID, EdgeData)> = endEdges.subtracting(startEdges).reduce(into: .init()) { result, edge in
             result[edge] = try! (edgeTail(edge), edgeHead(edge), edgeData(edge))
         }
         let exitingEdges = startEdges.subtracting(endEdges)
         let updatableEdges = startEdges.intersection(endEdges)
-        let updatingEdges: [EdgeID: EdgeData] = updatableEdges.reduce(into: .init()) { result, edge in
+        let updatingEdges: SortedDictionary<EdgeID, EdgeData> = updatableEdges.reduce(into: .init()) { result, edge in
             let selfData = try! edgeData(edge)
             let otherData = try! other.edgeData(edge)
             if selfData != otherData {
                 result[edge] = selfData
             }
         }
-        let movingEdges: [EdgeID: (NodeID, NodeID)] = updatableEdges.reduce(into: .init()) { result, edge in
+        let movingEdges: SortedDictionary<EdgeID, (NodeID, NodeID)> = updatableEdges.reduce(into: .init()) { result, edge in
             let selfEnds = try! edgeEnds(edge)
             let otherEnds = try! other.edgeEnds(edge)
             if selfEnds != otherEnds {
@@ -111,31 +112,31 @@ public extension ViewableGraph {
         
         var mutations: [GraphMutation<G>] = []
         
-        for (node, data) in enteringNodes.sorted(by: { $0.0 < $1.0 }) {
+        for (node, data) in enteringNodes {
             mutations.append(.newNode(node, data))
         }
         
-        for (node, data) in updatingNodes.sorted(by: { $0.0 < $1.0 }) {
+        for (node, data) in updatingNodes {
             mutations.append(.setNodeData(node, data))
         }
         
-        for (edge, (tail, head, data)) in enteringEdges.sorted(by: { $0.0 < $1.0 }) {
+        for (edge, (tail, head, data)) in enteringEdges {
             mutations.append(.newEdge(edge, tail, head, data))
         }
         
-        for (edge, data) in updatingEdges.sorted(by: { $0.0 < $1.0 }) {
+        for (edge, data) in updatingEdges {
             mutations.append(.setEdgeData(edge, data))
         }
         
-        for (edge, (tail, head)) in movingEdges.sorted(by: { $0.0 < $1.0 }) {
+        for (edge, (tail, head)) in movingEdges {
             mutations.append(.moveEdge(edge, tail, head))
         }
         
-        for edge in exitingEdges.sorted() {
+        for edge in exitingEdges {
             mutations.append(.removeEdge(edge))
         }
         
-        for node in exitingNodes.sorted() {
+        for node in exitingNodes {
             mutations.append(.removeNode(node))
         }
 

@@ -2,7 +2,7 @@ import Foundation
 
 public extension ViewableGraph {
     func isTree(root: NodeID) throws -> Bool {
-        try depthFirstSearch(IsTreeVisitor(root: root), roots: [root], isSorted: false)
+        try depthFirstSearch(IsTreeVisitor(root: root), roots: [root])
     }
 }
 

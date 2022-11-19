@@ -69,7 +69,7 @@ public extension EditableTree {
         }
 
         // Remove child nodes in reverse-topological sort order (most distant from the target first).
-        let removeOrder = try! topologicalSort(roots: [node], rootsOnly: true, isSorted: false)
+        let removeOrder = try! topologicalSort(roots: [node], rootsOnly: true)
         for node in removeOrder {
             try graph.removeNode(node)
         }

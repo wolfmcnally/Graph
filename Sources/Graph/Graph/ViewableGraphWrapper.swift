@@ -1,4 +1,5 @@
 import Foundation
+import SortedCollections
 
 public protocol ViewableGraphWrapper: ViewableGraph
 where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID,
@@ -22,11 +23,11 @@ public extension ViewableGraphWrapper {
         graph.edgesCount
     }
     
-    var nodes: [NodeID] {
+    var nodes: SortedSet<NodeID> {
         graph.nodes
     }
     
-    var edges: [EdgeID] {
+    var edges: SortedSet<EdgeID> {
         graph.edges
     }
     
@@ -54,27 +55,27 @@ public extension ViewableGraphWrapper {
         try graph.edgeData(edge)
     }
     
-    func nodeOutEdges(_ node: NodeID) throws -> [EdgeID] {
+    func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
         try graph.nodeOutEdges(node)
     }
     
-    func nodeInEdges(_ node: NodeID) throws -> [EdgeID] {
+    func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
         try graph.nodeInEdges(node)
     }
     
-    func nodeEdges(_ node: NodeID) throws -> [EdgeID] {
+    func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
         try graph.nodeEdges(node)
     }
     
-    func nodeSuccessors(_ node: NodeID) throws -> [NodeID] {
+    func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> {
         try graph.nodeSuccessors(node)
     }
     
-    func nodePredecessors(_ node: NodeID) throws -> [NodeID] {
+    func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> {
         try graph.nodePredecessors(node)
     }
     
-    func nodeNeighbors(_ node: NodeID) throws -> [NodeID] {
+    func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID> {
         try graph.nodeNeighbors(node)
     }
     

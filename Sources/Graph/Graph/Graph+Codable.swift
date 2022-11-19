@@ -1,5 +1,6 @@
 import Foundation
 import WolfBase
+import SortedCollections
 
 extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codable & DefaultConstructable, EdgeData: Codable & DefaultConstructable, GraphData: Codable & DefaultConstructable {
     enum CodingKeys: CodingKey {
@@ -65,9 +66,9 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
         }
         
         if NodeData.self == Empty.self {
-            let nodes: [NodeID] = _nodes.reduce(into: []) { result, element in
-                result.append(element.key)
-            }.sorted()
+            let nodes: SortedSet<NodeID> = _nodes.reduce(into: []) { result, element in
+                result.insert(element.key)
+            }
             try container.encode(nodes, forKey: .nodes)
         } else {
             let nodes: Dictionary<NodeID, EncodingNode> = _nodes.reduce(into: .init()) { result, element in
