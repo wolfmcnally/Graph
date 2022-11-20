@@ -79,6 +79,18 @@ public extension ViewableGraphWrapper {
         try graph.nodeNeighbors(node)
     }
     
+    func hasSuccessors(_ node: NodeID) throws -> Bool {
+        try graph.hasSuccessors(node)
+    }
+    
+    func hasPredecessors(_ node: NodeID) throws -> Bool {
+        try graph.hasPredecessors(node)
+    }
+    
+    func hasNeighbors(_ node: NodeID) throws -> Bool {
+        try graph.hasNeighbors(node)
+    }
+
     func edgeHead(_ edge: EdgeID) throws -> NodeID {
         try graph.edgeHead(edge)
     }

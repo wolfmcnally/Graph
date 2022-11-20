@@ -116,6 +116,18 @@ extension Graph {
         return successors.union(predececessors)
     }
     
+    public func hasSuccessors(_ node: NodeID) throws -> Bool {
+        try !nodeOutEdges(node).isEmpty
+    }
+    
+    public func hasPredecessors(_ node: NodeID) throws -> Bool {
+        try !nodeInEdges(node).isEmpty
+    }
+    
+    public func hasNeighbors(_ node: NodeID) throws -> Bool {
+        try hasSuccessors(node) || hasPredecessors(node)
+    }
+
     public func edgeHead(_ edge: EdgeID) throws -> NodeID {
         try getEdge(edge).head
     }

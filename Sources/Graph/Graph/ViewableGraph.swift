@@ -33,6 +33,10 @@ public protocol ViewableGraph  {
     func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID>
     func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID>
 
+    func hasSuccessors(_ node: NodeID) throws -> Bool
+    func hasPredecessors(_ node: NodeID) throws -> Bool
+    func hasNeighbors(_ node: NodeID) throws -> Bool
+
     func edgeHead(_ edge: EdgeID) throws -> NodeID
     func edgeTail(_ edge: EdgeID) throws -> NodeID
     func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID)

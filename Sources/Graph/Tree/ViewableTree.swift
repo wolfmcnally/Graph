@@ -1,4 +1,5 @@
 import Foundation
+import SortedCollections
 
 public protocol ViewableTree: ViewableGraph {
     var root: NodeID { get }
@@ -18,6 +19,14 @@ public extension ViewableTree {
             return nil
         }
         return try! edgeTail(e)
+    }
+    
+    func children(_ node: NodeID) throws -> SortedSet<NodeID> {
+        try nodeSuccessors(node)
+    }
+    
+    func hasChildren(_ node: NodeID) throws -> Bool {
+        try hasSuccessors(node)
     }
     
     var nonRootNodes: [NodeID] {
