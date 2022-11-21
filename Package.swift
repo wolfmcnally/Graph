@@ -13,6 +13,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0")),
         .package(url: "https://github.com/apple/swift-collections", branch: "main"),
+        .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
         .target(
@@ -23,6 +24,9 @@ let package = Package(
             ]),
         .testTarget(
             name: "GraphTests",
-            dependencies: ["Graph"]),
+            dependencies: [
+                "Graph",
+                .product(name: "Algorithms", package: "swift-algorithms"),
+            ]),
     ]
 )
