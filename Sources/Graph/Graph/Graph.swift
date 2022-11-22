@@ -4,7 +4,6 @@ import SortedCollections
 public struct Graph<NodeID, EdgeID, NodeData, EdgeData, GraphData>: EditableGraph
 where NodeID: ElementID, EdgeID: ElementID
 {
-    // These should be replaced with SortedDictionary from Swift Collections when it's ready
     var _nodes: SortedDictionary<NodeID, Node> = [:]
     var _edges: SortedDictionary<EdgeID, Edge> = [:]
     public var data: GraphData
@@ -14,7 +13,6 @@ where NodeID: ElementID, EdgeID: ElementID
     }
 
     struct Node {
-        // These should be replaced with SortedSet from Swift Collections when it's ready
         var inEdges: SortedSet<EdgeID> = []
         var outEdges: SortedSet<EdgeID> = []
         var data: NodeData
