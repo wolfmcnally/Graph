@@ -3,39 +3,34 @@ import WolfBase
 import Collections
 import SortedCollections
 
+// Based on the algorithm:
+// Kaizhong Zhang and Dennis Shasha. Simple fast algorithms for the editing distance between trees and related problems. SIAM Journal of Computing, 18:1245–1262, 1989
+// https://grantjenks.com/wiki/_media/ideas/simple_fast_algorithms_for_the_editing_distance_between_tree_and_related_problems.pdf
+
 // Based on Python implementation:
 // https://github.com/timtadh/zhang-shasha
 
-public func distance<T: ViewableTree>(
-    from a: T, aRoot: T.NodeID? = nil,
-    to b: T, bRoot: T.NodeID? = nil
-) -> (Double, [Operation]) where T.NodeData: Equatable {
-    distance(
-        from: a, aRoot: aRoot,
-        to: b, bRoot: bRoot,
+public func editingDistance<T: ViewableTree>(from a: T, to b: T, filterMatches: Bool = true) -> (cost: Double, ops: [Operation<T>]) where T.NodeData: Equatable {
+    editingDistance(from: a, to: b, filterMatches: filterMatches,
         insertCost: { _ in 1 },
         removeCost: { _ in 1 },
         updateCost: { $0 == $1 ? 0 : 1 }
     )
 }
 
-public func distance<T: ViewableTree>(
-    from a: T, aRoot: T.NodeID? = nil,
-    to b: T, bRoot: T.NodeID? = nil,
+public func editingDistance<T: ViewableTree>(from a: T, to b: T, filterMatches: Bool = true,
     insertCost: (T.NodeData) -> Double,
     removeCost: (T.NodeData) -> Double,
     updateCost: (T.NodeData, T.NodeData) -> Double
-) -> (Double, [Operation]) {
+) -> (cost: Double, ops: [Operation<T>]) {
     typealias NodeID = T.NodeID
     
-    let aRoot = aRoot ?? a.root
-    let bRoot = bRoot ?? b.root
-    let A = AnnotatedTree(a, root: aRoot)
-    let B = AnnotatedTree(b, root: bRoot)
+    let A = AnnotatedTree(a)
+    let B = AnnotatedTree(b)
     let sizeA = A.nodes.count
     let sizeB = B.nodes.count
     var treedists = Array(repeating: Array(repeating: 0.0, count: sizeB), count: sizeA)
-    var operations: [[[Operation]]] = Array(repeating: Array(repeating: [], count: sizeB), count: sizeA)
+    var operations: [[[Operation<T>]]] = Array(repeating: Array(repeating: [], count: sizeB), count: sizeA)
     
     func _removeCost(_ index: Int) -> Double { removeCost(A.label(index)) }
     func _insertCost(_ index: Int) -> Double { insertCost(B.label(index)) }
@@ -50,7 +45,7 @@ public func distance<T: ViewableTree>(
         let m = i - Al[i] + 2
         let n = j - Bl[j] + 2
         var fd = Array(repeating: Array(repeating: 0.0, count: n), count: m)
-        var partialOps: [[[Operation]]] = Array(repeating: Array(repeating: [], count: n), count: m)
+        var partialOps: [[[Operation<T>]]] = Array(repeating: Array(repeating: [], count: n), count: m)
         
         let ioff = Al[i] - 1
         let joff = Bl[j] - 1
@@ -59,14 +54,18 @@ public func distance<T: ViewableTree>(
         for x in 1..<m {
             let node = An[x + ioff]
             fd[x][0] = fd[x - 1][0] + _removeCost(node)
-            let op = Operation.remove(node)
+            let aNode = A.nodeIDForIndex[node]!
+            let aData = try! A.tree.nodeData(aNode)
+            let op = Operation<T>.remove(node, aData: aData)
             partialOps[x][0] = partialOps[x - 1][0].appending(op)
         }
         // δ(θ, l(j1)..j) = δ(θ, l(j1)..j-1) + γ(λ → w)
         for y in 1..<n {
-            let node = Bn[y + joff]
-            fd[0][y] = fd[0][y - 1] + _insertCost(node)
-            let op = Operation.insert(node)
+            let node1 = An[1 + ioff]
+            let node2 = Bn[y + joff]
+            fd[0][y] = fd[0][y - 1] + _insertCost(node2)
+            let bData = try! B.tree.nodeData(B.nodeIDForIndex[node2]!)
+            let op = Operation<T>.insert(node1, bData: bData)
             partialOps[0][y] = partialOps[0][y - 1].appending(op)
         }
         
@@ -76,6 +75,10 @@ public func distance<T: ViewableTree>(
                 // the treedists table (same for y and y+joff)
                 let node1 = An[x + ioff]
                 let node2 = Bn[y + joff]
+                let aNode = A.nodeIDForIndex[node1]!
+                let aData = try! A.tree.nodeData(aNode)
+                let bNode = B.nodeIDForIndex[node2]!
+                let bData = try! B.tree.nodeData(bNode)
                 // only need to check if x is an ancestor of i
                 // and y is an ancestor of j
                 if Al[i] == Al[x + ioff] && Bl[j] == Bl[y + joff] {
@@ -94,17 +97,17 @@ public func distance<T: ViewableTree>(
                     
                     switch minIndex {
                     case 0:
-                        let op = Operation.remove(node1)
+                        let op = Operation<T>.remove(node1, aData: aData)
                         partialOps[x][y] = partialOps[x - 1][y].appending(op)
                     case 1:
-                        let op = Operation.insert(node2)
+                        let op = Operation<T>.insert(node1, bData: bData)
                         partialOps[x][y] = partialOps[x][y - 1].appending(op)
                     default:
-                        let op: Operation
+                        let op: Operation<T>
                         if fd[x][y] == fd[x - 1][y - 1] {
-                            op = .match(node1, node2)
+                            op = .match(node1, abData: aData)
                         } else {
-                            op = .update(node1, node2)
+                            op = .update(node1, bData: bData)
                         }
                         partialOps[x][y] = partialOps[x - 1][y - 1].appending(op)
                     }
@@ -129,10 +132,10 @@ public func distance<T: ViewableTree>(
                     let minIndex = costs.firstIndex(of: fd[x][y])!
                     switch minIndex {
                     case 0:
-                        let op = Operation.remove(node1)
+                        let op = Operation<T>.remove(node1, aData: aData)
                         partialOps[x][y] = partialOps[x - 1][y].appending(op)
                     case 1:
-                        let op = Operation.insert(node2)
+                        let op = Operation<T>.insert(node1, bData: bData)
                         partialOps[x][y] = partialOps[x][y - 1].appending(op)
                     default:
                         partialOps[x][y] = partialOps[p][q] + operations[x + ioff][y + joff]
@@ -148,24 +151,50 @@ public func distance<T: ViewableTree>(
         }
     }
     
+    let distance = treedists.last!.last!
+    var ops = operations.last!.last!
+    if filterMatches {
+        ops = ops.filter {
+            if case .match = $0 {
+                return false
+            } else {
+                return true
+            }
+        }
+    }
+    
     return (
-        treedists.last!.last!,
-        operations.last!.last!
+        distance,
+        ops
     )
 }
 
-public enum Operation {
-    case remove(Int)
-    case insert(Int)
-    case update(Int, Int)
-    case match(Int, Int)
+public enum Operation<T: ViewableTree>: CustomStringConvertible {
+    case remove(Int, aData: T.NodeData)
+    case insert(Int, bData: T.NodeData)
+    case update(Int, bData: T.NodeData)
+    case match(Int, abData: T.NodeData)
+    
+    public var description: String {
+        var comps: [Any] = []
+        switch self {
+        case .remove(let aNode, let aData):
+            comps.append(contentsOf: ["remove", aNode, aData])
+        case .insert(let aNode, let bData):
+            comps.append(contentsOf: ["insert", aNode, bData])
+        case .update(let aNode, let bData):
+            comps.append(contentsOf: ["update", aNode, bData])
+        case .match(let aNode, let abData):
+            comps.append(contentsOf: ["match", aNode, abData])
+        }
+        return comps.map({ "\($0)" }).joined(separator: ", ").flanked("(", ")")
+    }
 }
 
 struct AnnotatedTree<T: ViewableTree> {
     typealias NodeID = T.NodeID
     
     let tree: T
-    let root: NodeID
     let nodeIDForIndex: [Int: NodeID]
     let indexForNodeID: [NodeID: Int]
     let nodes: [Int] // a post-order enumeration of the nodes in the tree
@@ -180,10 +209,8 @@ struct AnnotatedTree<T: ViewableTree> {
         return try! tree.nodeData(nodeIDForIndex[index]!)
     }
     
-    init(_ tree: T, root: NodeID? = nil) {
+    init(_ tree: T) {
         self.tree = tree
-        let root = root ?? tree.root
-        self.root = root
 
         let treeNodes = Array(tree.nodes)
         let nodeIDForIndex: [Int: NodeID] = treeNodes.enumerated().reduce(into: [:]) { result, indexNode in
@@ -195,7 +222,7 @@ struct AnnotatedTree<T: ViewableTree> {
             result[node] = index
         }
 
-        let rootIndex = indexForNodeID[root]!
+        let rootIndex = indexForNodeID[tree.root]!
         var stack: [(Int, Deque<Int>)] = [(rootIndex, Deque())]
         var pstack: [((Int, Int), Deque<Int>)] = []
         
@@ -256,5 +283,42 @@ struct AnnotatedTree<T: ViewableTree> {
         self.lmds = lmds
         self.nodes = nodes
         self.keyRoots = keyRoots.values.sorted()
+    }
+}
+
+public extension EditableTree where NodeData: Equatable {
+    func editingOperations(to other: Self) -> [Operation<Self>] {
+        editingDistance(from: self, to: other).ops
+    }
+    
+    func applyEditingOperations(_ ops: [Operation<Self>], nextNodeID: () -> NodeID, nextEdgeID: () -> EdgeID, makeEdgeData: () -> EdgeData, callback: ((Operation<Self>, Self) -> Void)? = nil) throws -> Self {
+        var result = self
+        let t = AnnotatedTree(self)
+        
+        func nodeID(_ index: Int) throws -> NodeID {
+            guard let node = t.nodeIDForIndex[index] else {
+                throw GraphError.invalidEditingOperation
+            }
+            return node
+        }
+        for op in ops {
+            switch op {
+            case .remove(let index, _):
+                try result.removeNodeUngrouping(nodeID(index))
+            case .insert(let index, let bData):
+                try result.insertNode(nextNodeID(), at: nodeID(index), edge: nextEdgeID(), nodeData: bData, edgeData: makeEdgeData())
+            case .update(let index, let bData):
+                try result.withNodeData(nodeID(index)) {
+                    $0 = bData
+                }
+            case .match(_, _):
+                break
+            }
+            
+            if let callback {
+                callback(op, result)
+            }
+        }
+        return result
     }
 }

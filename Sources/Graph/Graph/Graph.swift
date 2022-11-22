@@ -32,83 +32,32 @@ where NodeID: ElementID, EdgeID: ElementID
 }
 
 extension Graph where GraphData == Void {
-    public init() {
-        self.init(data: ())
-    }
+    public init() { self.init(data: ()) }
 }
 
 extension Graph where GraphData: DefaultConstructable {
-    public init() {
-        self.init(data: GraphData())
-    }
+    public init() { self.init(data: GraphData()) }
 }
 
 // MARK: - ViewableGraph Implementations
 
 extension Graph {
-    public var isEmpty: Bool {
-        nodesCount == 0
-    }
-
-    public var nodesCount: Int {
-        _nodes.count
-    }
-    
-    public var edgesCount: Int {
-        _edges.count
-    }
-
-    public var nodes: SortedSet<NodeID> {
-        SortedSet(_nodes.keys)
-    }
-    
-    public var edges: SortedSet<EdgeID> {
-        SortedSet(_edges.keys)
-    }
-    
-    public func hasNode(_ node: NodeID) -> Bool {
-        _nodes[node] != nil
-    }
-    
-    public func hasNoNode(_ node: NodeID) -> Bool {
-        !hasNode(node)
-    }
-    
-    public func hasEdge(_ edge: EdgeID) -> Bool {
-        _edges[edge] != nil
-    }
-    
-    public func hasNoEdge(_ edge: EdgeID) -> Bool {
-        !hasEdge(edge)
-    }
-
-    public func nodeData(_ node: NodeID) throws -> NodeData {
-        try getNode(node).data
-    }
-    
-    public func edgeData(_ edge: EdgeID) throws -> EdgeData {
-        try getEdge(edge).data
-    }
-
-    public func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
-        try getNode(node).outEdges
-    }
-    
-    public func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
-        try getNode(node).inEdges
-    }
-    
-    public func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
-        try nodeOutEdges(node).union(nodeInEdges(node))
-    }
-    
-    public func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> {
-        try SortedSet(nodeOutEdges(node).map(edgeHead))
-    }
-    
-    public func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> {
-        try SortedSet(nodeInEdges(node).map(edgeTail))
-    }
+    public var isEmpty: Bool { nodesCount == 0 }
+    public var nodesCount: Int { _nodes.count }
+    public var edgesCount: Int { _edges.count }
+    public var nodes: SortedSet<NodeID> { SortedSet(_nodes.keys) }
+    public var edges: SortedSet<EdgeID> { SortedSet(_edges.keys) }
+    public func hasNode(_ node: NodeID) -> Bool { _nodes[node] != nil }
+    public func hasNoNode(_ node: NodeID) -> Bool { !hasNode(node) }
+    public func hasEdge(_ edge: EdgeID) -> Bool { _edges[edge] != nil }
+    public func hasNoEdge(_ edge: EdgeID) -> Bool { !hasEdge(edge) }
+    public func nodeData(_ node: NodeID) throws -> NodeData { try getNode(node).data }
+    public func edgeData(_ edge: EdgeID) throws -> EdgeData { try getEdge(edge).data }
+    public func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try getNode(node).outEdges }
+    public func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try getNode(node).inEdges }
+    public func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try nodeOutEdges(node).union(nodeInEdges(node)) }
+    public func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> { try SortedSet(nodeOutEdges(node).map(edgeHead)) }
+    public func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> { try SortedSet(nodeInEdges(node).map(edgeTail)) }
     
     public func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID> {
         let successors = try nodeSuccessors(node)
@@ -116,25 +65,11 @@ extension Graph {
         return successors.union(predececessors)
     }
     
-    public func hasSuccessors(_ node: NodeID) throws -> Bool {
-        try !nodeOutEdges(node).isEmpty
-    }
-    
-    public func hasPredecessors(_ node: NodeID) throws -> Bool {
-        try !nodeInEdges(node).isEmpty
-    }
-    
-    public func hasNeighbors(_ node: NodeID) throws -> Bool {
-        try hasSuccessors(node) || hasPredecessors(node)
-    }
-
-    public func edgeHead(_ edge: EdgeID) throws -> NodeID {
-        try getEdge(edge).head
-    }
-
-    public func edgeTail(_ edge: EdgeID) throws -> NodeID {
-        try getEdge(edge).tail
-    }
+    public func hasSuccessors(_ node: NodeID) throws -> Bool { try !nodeOutEdges(node).isEmpty }
+    public func hasPredecessors(_ node: NodeID) throws -> Bool { try !nodeInEdges(node).isEmpty }
+    public func hasNeighbors(_ node: NodeID) throws -> Bool { try hasSuccessors(node) || hasPredecessors(node) }
+    public func edgeHead(_ edge: EdgeID) throws -> NodeID { try getEdge(edge).head }
+    public func edgeTail(_ edge: EdgeID) throws -> NodeID { try getEdge(edge).tail }
     
     public func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID) {
         let e = try getEdge(edge)
@@ -170,7 +105,7 @@ extension Graph {
 
     public mutating func removeNode(_ node: NodeID) throws {
         try removeNodeEdges(node)
-        _nodes.removeValue(forKey: node)
+        _ = _nodes.removeValue(forKey: node)
     }
 
     public mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
@@ -187,7 +122,7 @@ extension Graph {
         let e = try getEdge(edge)
         _nodes[e.tail]!.outEdges.remove(edge)
         _nodes[e.head]!.inEdges.remove(edge)
-        _edges.removeValue(forKey: edge)
+        _ = _edges.removeValue(forKey: edge)
     }
 
     public mutating func removeNodeEdges(_ node: NodeID) throws {
@@ -230,15 +165,11 @@ extension Graph {
 }
 
 public extension Graph where NodeData: DefaultConstructable {
-    mutating func newNode(_ node: NodeID) throws {
-        try newNode(node, data: NodeData())
-    }
+    mutating func newNode(_ node: NodeID) throws { try newNode(node, data: NodeData()) }
 }
 
 public extension Graph where NodeData == Void {
-    mutating func newNode(_ node: NodeID) throws {
-        try newNode(node, data: ())
-    }
+    mutating func newNode(_ node: NodeID) throws { try newNode(node, data: ()) }
 }
 
 private extension Graph {

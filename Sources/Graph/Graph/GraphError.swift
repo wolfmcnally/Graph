@@ -6,4 +6,5 @@ public enum GraphError: Error {
     case notATree
     case notADAG
     case notACompound
+    case invalidEditingOperation
 }

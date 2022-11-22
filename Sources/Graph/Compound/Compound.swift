@@ -37,13 +37,17 @@ where InnerGraph: EditableGraph,
         self.tree = tree
     }
 
-    public var root: NodeID {
+    public var root: NodeID! {
         tree.root
     }
     
     public var data: InnerGraph.GraphData {
         get { graph.data }
         set { graph.data = newValue }
+    }
+    
+    public func subtree(root: NodeID) throws -> Self {
+        try Self(graph: graph, tree: tree.subtree(root: root))
     }
 }
 

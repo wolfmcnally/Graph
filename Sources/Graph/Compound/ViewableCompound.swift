@@ -18,4 +18,8 @@ extension ViewableCompound {
     public func parent(_ node: NodeID) throws -> NodeID? {
         try tree.parent(node)
     }
+    
+    func subtree(root: NodeID) throws -> InnerTree {
+        try tree.subtree(root: root)
+    }
 }

@@ -2,11 +2,13 @@ import Foundation
 import SortedCollections
 
 public protocol ViewableTree: ViewableGraph {
-    var root: NodeID { get }
+    var root: NodeID! { get }
 
     func inEdge(_ node: NodeID) throws -> EdgeID?
     func parent(_ node: NodeID) throws -> NodeID?
     var nonRootNodes: [NodeID] { get }
+    
+    func subtree(root: NodeID) throws -> Self
 }
 
 public extension ViewableTree {
@@ -21,15 +23,15 @@ public extension ViewableTree {
         return try! edgeTail(e)
     }
     
+    var nonRootNodes: [NodeID] {
+        nodes.filter { $0 != root }
+    }
+    
     func children(_ node: NodeID) throws -> SortedSet<NodeID> {
         try nodeSuccessors(node)
     }
     
     func hasChildren(_ node: NodeID) throws -> Bool {
         try hasSuccessors(node)
-    }
-    
-    var nonRootNodes: [NodeID] {
-        nodes.filter { $0 != root }
     }
 }
