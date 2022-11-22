@@ -306,7 +306,7 @@ public extension EditableTree where NodeData: Equatable {
             case .remove(let index, _):
                 try result.removeNodeUngrouping(nodeID(index))
             case .insert(let index, let bData):
-                try result.insertNode(nextNodeID(), at: nodeID(index), edge: nextEdgeID(), nodeData: bData, edgeData: makeEdgeData())
+                try result.insertNode(nextNodeID(), before: nodeID(index), edge: nextEdgeID(), nodeData: bData, edgeData: makeEdgeData())
             case .update(let index, let bData):
                 try result.withNodeData(nodeID(index)) {
                     $0 = bData

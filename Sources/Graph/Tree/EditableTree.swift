@@ -17,7 +17,7 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
 
     mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
     mutating func removeNodeUngrouping(_ node: NodeID) throws
     mutating func removeNodeAndChildren(_ node: NodeID) throws
     mutating func moveNode(_ node: NodeID, newParent: NodeID) throws
@@ -49,6 +49,66 @@ public extension EditableTree2 {
     }
 }
 
+public extension EditableTree2 where NodeData: DefaultConstructable {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: edgeData)
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: NodeData(), edgeData: edgeData)
+    }
+}
+
+public extension EditableTree2 where NodeData == Void {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: edgeData)
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: (), edgeData: edgeData)
+    }
+}
+
+public extension EditableTree2 where EdgeData: DefaultConstructable {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: EdgeData())
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, nodeData: NodeData) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: nodeData, edgeData: EdgeData())
+    }
+}
+
+public extension EditableTree2 where EdgeData == Void {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: ())
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, nodeData: NodeData) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: nodeData, edgeData: ())
+    }
+}
+
+public extension EditableTree2 where NodeData: DefaultConstructable, EdgeData: DefaultConstructable {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: EdgeData())
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: NodeData(), edgeData: EdgeData())
+    }
+}
+
+public extension EditableTree2 where NodeData == Void, EdgeData == Void {
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
+        try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: ())
+    }
+    
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID) throws {
+        try insertNode(node, before: existingNode, edge: edge, nodeData: (), edgeData: ())
+    }
+}
+
 public protocol EditableTree: EditableTree2, ViewableTree
 where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
       NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData,
@@ -62,7 +122,7 @@ public extension EditableTree {
         try graph.newEdge(edge, tail: parent, head: node, data: edgeData)
     }
     
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws {
+    mutating func insertNode(_ node: NodeID, before existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws {
         if existingNode == root {
             try graph.newNode(node, data: nodeData)
             try graph.newEdge(edge, tail: node, head: root, data: edgeData)
@@ -116,62 +176,9 @@ public extension EditableTree {
     }
 }
 
-public extension EditableTree where NodeData: DefaultConstructable {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: edgeData)
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: NodeData(), edgeData: edgeData)
-    }
-}
-
-public extension EditableTree where NodeData == Void {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: edgeData)
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, edgeData: EdgeData) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: (), edgeData: edgeData)
-    }
-}
-
-public extension EditableTree where EdgeData: DefaultConstructable {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: EdgeData())
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: nodeData, edgeData: EdgeData())
-    }
-}
-
-public extension EditableTree where EdgeData == Void {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: ())
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: nodeData, edgeData: ())
-    }
-}
-
-public extension EditableTree where NodeData: DefaultConstructable, EdgeData: DefaultConstructable {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: NodeData(), edgeData: EdgeData())
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: NodeData(), edgeData: EdgeData())
-    }
-}
-
-public extension EditableTree where NodeData == Void, EdgeData == Void {
-    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID) throws {
-        try newNode(node, parent: parent, edge: edge, nodeData: (), edgeData: ())
-    }
-    
-    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID) throws {
-        try insertNode(node, at: existingNode, edge: edge, nodeData: (), edgeData: ())
-    }
+public protocol OrderedEditableTree: EditableTree2, OrderedViewableTree
+where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
+      NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData,
+      InnerGraph: OrderedEditableGraph
+{
 }
