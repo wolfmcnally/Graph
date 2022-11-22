@@ -1,17 +1,18 @@
 import Foundation
 import SortedCollections
+import OrderedCollections
 
-public protocol ViewableGraph  {
+public protocol ViewableGraph2  {
     associatedtype NodeID: ElementID
     associatedtype EdgeID: ElementID
     associatedtype NodeData
     associatedtype EdgeData
     associatedtype GraphData
-    
-    var isEmpty: Bool { get }
 
     var nodesCount: Int { get }
     var edgesCount: Int { get }
+    
+    var isEmpty: Bool { get }
 
     var nodes: SortedSet<NodeID> { get }
     var edges: SortedSet<EdgeID> { get }
@@ -25,11 +26,9 @@ public protocol ViewableGraph  {
     func edgeData(_ edge: EdgeID) throws -> EdgeData
     var data: GraphData { get }
 
-    func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
     func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
     func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
 
-    func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID>
     func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID>
     func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID>
 
@@ -42,14 +41,24 @@ public protocol ViewableGraph  {
     func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID)
 }
 
-public extension ViewableGraph where GraphData == Empty {
+public extension ViewableGraph2 where GraphData == Empty {
     var data: Empty {
         Empty()
     }
 }
 
-public extension ViewableGraph where GraphData == Void {
+public extension ViewableGraph2 where GraphData == Void {
     var data: Void {
         ()
     }
+}
+
+public protocol ViewableGraph: ViewableGraph2 {
+    func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID>
+    func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID>
+}
+
+public protocol OrderedViewableGraph: ViewableGraph2 {
+    func nodeOutEdges(_ node: NodeID) throws -> OrderedSet<EdgeID>
+    func nodeSuccessors(_ node: NodeID) throws -> OrderedSet<NodeID>
 }

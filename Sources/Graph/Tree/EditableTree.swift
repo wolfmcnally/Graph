@@ -1,22 +1,23 @@
 import Foundation
 import WolfBase
 
-public protocol EditableTree: ViewableTree
+public protocol EditableTree2: ViewableTree2
 where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
       NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData
 {
-    associatedtype InnerGraph: EditableGraph
-
+    associatedtype InnerGraph: EditableGraph2
+    
     var graph: InnerGraph { get set }
     
     mutating func setRoot(_ root: NodeID) throws
-
+    
     mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T
     mutating func setNodeData(_ node: NodeID, data: NodeData) throws
     mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
 
     mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
+    mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
     mutating func removeNodeUngrouping(_ node: NodeID) throws
     mutating func removeNodeAndChildren(_ node: NodeID) throws
     mutating func moveNode(_ node: NodeID, newParent: NodeID) throws
@@ -24,15 +25,10 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
     mutating func withSubtree<T>(root: NodeID, transform: (inout Self) throws -> T) throws -> T
 }
 
-public extension EditableTree {
+public extension EditableTree2 {
     @discardableResult
     mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T {
         try graph.withNodeData(node, transform: transform)
-    }
-    
-    @discardableResult
-    mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
-        try graph.withEdgeData(edge, transform: transform)
     }
     
     mutating func setNodeData(_ node: NodeID, data: NodeData) throws {
@@ -41,12 +37,26 @@ public extension EditableTree {
         }
     }
     
+    @discardableResult
+    mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
+        try graph.withEdgeData(edge, transform: transform)
+    }
+    
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
         try withEdgeData(edge) {
             $0 = data
         }
     }
-    
+}
+
+public protocol EditableTree: EditableTree2, ViewableTree
+where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
+      NodeData == InnerGraph.NodeData, EdgeData == InnerGraph.EdgeData,
+      InnerGraph: EditableGraph
+{
+}
+
+public extension EditableTree {
     mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws {
         try graph.newNode(node, data: nodeData)
         try graph.newEdge(edge, tail: parent, head: node, data: edgeData)
