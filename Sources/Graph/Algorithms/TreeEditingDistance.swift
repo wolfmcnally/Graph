@@ -10,8 +10,8 @@ import SortedCollections
 // Based on Python implementation:
 // https://github.com/timtadh/zhang-shasha
 
-public func editingDistance<T: ViewableTree>(from a: T, to b: T, filterMatches: Bool = true) -> (cost: Double, ops: [Operation<T>]) where T.NodeData: Equatable {
-    editingDistance(from: a, to: b, filterMatches: filterMatches,
+public func editingDistance<T: ViewableTree>(from a: T, to b: T, filterMatches: Bool = true) throws -> (cost: Double, ops: [Operation<T>]) where T.NodeData: Equatable {
+    try editingDistance(from: a, to: b, filterMatches: filterMatches,
         insertCost: { _ in 1 },
         removeCost: { _ in 1 },
         updateCost: { $0 == $1 ? 0 : 1 }
@@ -22,8 +22,12 @@ public func editingDistance<T: ViewableTree>(from a: T, to b: T, filterMatches: 
     insertCost: (T.NodeData) -> Double,
     removeCost: (T.NodeData) -> Double,
     updateCost: (T.NodeData, T.NodeData) -> Double
-) -> (cost: Double, ops: [Operation<T>]) {
+) throws -> (cost: Double, ops: [Operation<T>]) {
     typealias NodeID = T.NodeID
+    
+    guard a.isOrdered && b.isOrdered else {
+        throw GraphError.notOrdered
+    }
     
     let A = AnnotatedTree(a)
     let B = AnnotatedTree(b)
@@ -287,8 +291,8 @@ struct AnnotatedTree<T: ViewableTree> {
 }
 
 public extension EditableTree where NodeData: Equatable {
-    func editingOperations(to other: Self) -> [Operation<Self>] {
-        editingDistance(from: self, to: other).ops
+    func editingOperations(to other: Self) throws -> [Operation<Self>] {
+        try editingDistance(from: self, to: other).ops
     }
     
     func applyEditingOperations(_ ops: [Operation<Self>], nextNodeID: () -> NodeID, nextEdgeID: () -> EdgeID, makeEdgeData: () -> EdgeData, callback: ((Operation<Self>, Self) -> Void)? = nil) throws -> Self {

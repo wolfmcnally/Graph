@@ -27,11 +27,18 @@ public extension ViewableTree {
         nodes.filter { $0 != root }
     }
     
-    func children(_ node: NodeID) throws -> SortedSet<NodeID> {
+    func children(_ node: NodeID) throws -> [NodeID] {
         try nodeSuccessors(node)
     }
     
     func hasChildren(_ node: NodeID) throws -> Bool {
         try hasSuccessors(node)
+    }
+    
+    func index(of node: NodeID) throws -> Int? {
+        guard let edge = try inEdge(node) else {
+            return nil
+        }
+        return try edgeIndex(edge)
     }
 }

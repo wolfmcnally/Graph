@@ -7,4 +7,6 @@ public enum GraphError: Error {
     case notADAG
     case notACompound
     case invalidEditingOperation
+    case notOrdered
+    case invalidIndex
 }

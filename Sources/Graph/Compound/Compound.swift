@@ -46,50 +46,85 @@ where InnerGraph: EditableGraph,
         set { graph.data = newValue }
     }
     
-    public func subtree(root: NodeID) throws -> Self {
+    public func subtree(root: InnerGraph.NodeID) throws -> Compound<InnerGraph, InnerTree> {
         try Self(graph: graph, tree: tree.subtree(root: root))
     }
 }
 
 // MARK: - EditableCompound Implementations
 
-extension Compound
+public extension Compound
 {
     /// Adding a node inserts it into both the graph and the tree, as a child of the specified `parent`.
-    public mutating func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws {
+    mutating func newNode(_ node: NodeID, data: NodeData, parent: NodeID, edge: EdgeID) throws {
         try graph.newNode(node, data: data)
         try tree.newNode(node, parent: parent, edge: edge)
     }
 
     /// Removing a node first promotes all its tree children to its parent,
     /// then removes it from both the tree and the graph.
-    public mutating func removeNode(_ node: NodeID) throws {
+    mutating func removeNode(_ node: NodeID) throws {
         try graph.removeNode(node)
         try tree.removeNodeUngrouping(node)
     }
 
-    /// Moves a node within the tree
-    public mutating func moveNode(_ node: NodeID, newParent: NodeID) throws {
+    /// Moves a node within the tree.
+    mutating func moveNode(_ node: NodeID, newParent: NodeID) throws {
         try tree.moveNode(node, newParent: newParent)
     }
 
-    /// Inserts an edge within the graph
-    public mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
+    /// Inserts an edge within the graph.
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
         try graph.newEdge(edge, tail: tail, head: head, data: data)
     }
+    
+    /// Inserts an edge within the graph.
+    ///
+    /// In an ordered graph, the edge will be inserted into tail's outEdges at `index`.
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, at index: Int, head: NodeID, data: EdgeData) throws {
+        try graph.newEdge(edge, tail: tail, at: index, head: head, data: data)
+    }
 
-    /// Removes an edge from the graph
-    public mutating func removeEdge(_ edge: EdgeID) throws {
+    /// Removes an edge from the graph.
+    mutating func removeEdge(_ edge: EdgeID) throws {
         try graph.removeEdge(edge)
     }
 
-    /// Removes all edges from a node in the graph
-    public mutating func removeNodeEdges(_ node: NodeID) throws {
+    /// Removes all edges from a node in the graph.
+    mutating func removeNodeEdges(_ node: NodeID) throws {
         try graph.removeNodeEdges(node)
     }
 
-    /// Moves an edge within the graph
-    public mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
+    /// Moves an edge within the graph.
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
         try graph.moveEdge(edge, newTail: newTail, newHead: newHead)
+    }
+    
+    /// Moves an edge within the graph.
+    ///
+    /// In an ordered graph, the edge will be inserted into tail's outEdges at `index`.
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, at index: Int, newHead: NodeID) throws {
+        try graph.moveEdge(edge, newTail: newTail, at: index, newHead: newHead)
+    }
+
+    /// Moves an edge to the `index` in the sibling ordering.
+    ///
+    /// Throws an exception if the graph is not ordered.
+    mutating func moveEdge(_ edge: EdgeID, to index: Int) throws {
+        try graph.moveEdge(edge, to: index)
+    }
+    
+    /// Moves an edge to the first in the sibling ordering.
+    ///
+    /// Throws an exception if the graph is not ordered.
+    mutating func moveEdgeToFront(_ edge: EdgeID) throws {
+        try graph.moveEdgeToFront(edge)
+    }
+
+    /// Moves an edge to the last in the sibling ordering.
+    ///
+    /// Throws an exception if the graph is not ordered.
+    mutating func moveEdgeToBack(_ edge: EdgeID) throws {
+        try graph.moveEdgeToBack(edge)
     }
 }

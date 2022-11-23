@@ -11,6 +11,10 @@ where InnerGraph.NodeID == NodeID, InnerGraph.EdgeID == EdgeID,
 }
 
 public extension ViewableGraphWrapper {
+    var isOrdered: Bool {
+        graph.isOrdered
+    }
+    
     var isEmpty: Bool {
         graph.isEmpty
     }
@@ -55,7 +59,7 @@ public extension ViewableGraphWrapper {
         try graph.edgeData(edge)
     }
     
-    func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> {
+    func nodeOutEdges(_ node: NodeID) throws -> any EdgeSet<EdgeID> {
         try graph.nodeOutEdges(node)
     }
     
@@ -67,11 +71,11 @@ public extension ViewableGraphWrapper {
         try graph.nodeEdges(node)
     }
     
-    func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> {
+    func nodeSuccessors(_ node: NodeID) throws -> [NodeID] {
         try graph.nodeSuccessors(node)
     }
     
-    func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> {
+    func nodePredecessors(_ node: NodeID) throws -> [NodeID] {
         try graph.nodePredecessors(node)
     }
     
@@ -79,6 +83,10 @@ public extension ViewableGraphWrapper {
         try graph.nodeNeighbors(node)
     }
     
+    func countSuccessors(_ node: NodeID) throws -> Int { try graph.nodeOutEdges(node).count }
+    func countPredecessors(_ node: NodeID) throws -> Int { try graph.nodeInEdges(node).count }
+    func countNeighbors(_ node: NodeID) throws -> Int { try graph.countSuccessors(node) + graph.countPredecessors(node) }
+
     func hasSuccessors(_ node: NodeID) throws -> Bool {
         try graph.hasSuccessors(node)
     }
@@ -101,5 +109,9 @@ public extension ViewableGraphWrapper {
     
     func edgeEnds(_ edge: EdgeID) throws -> (NodeID, NodeID) {
         try graph.edgeEnds(edge)
+    }
+    
+    func edgeIndex(_ edge: EdgeID) throws -> Int {
+        try graph.edgeIndex(edge)
     }
 }

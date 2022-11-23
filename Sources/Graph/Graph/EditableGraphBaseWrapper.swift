@@ -23,6 +23,10 @@ public extension EditableGraphBaseWrapper {
         try graph.newEdge(edge, tail: tail, head: head, data: data)
     }
 
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, at index: Int, head: NodeID, data: EdgeData) throws {
+        try graph.newEdge(edge, tail: tail, at: index, head: head, data: data)
+    }
+
     mutating func removeEdge(_ edge: EdgeID) throws {
         try graph.removeEdge(edge)
     }
@@ -33,5 +37,21 @@ public extension EditableGraphBaseWrapper {
     
     mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
         try graph.moveEdge(edge, newTail: newTail, newHead: newHead)
+    }
+    
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, at index: Int, newHead: NodeID) throws {
+        try graph.moveEdge(edge, newTail: newTail, at: index, newHead: newHead)
+    }
+    
+    mutating func moveEdge(_ edge: EdgeID, to index: Int) throws {
+        try graph.moveEdge(edge, to: index)
+    }
+    
+    mutating func moveEdgeToFront(_ edge: EdgeID) throws {
+        try graph.moveEdgeToFront(edge)
+    }
+
+    mutating func moveEdgeToBack(_ edge: EdgeID) throws {
+        try graph.moveEdgeToBack(edge)
     }
 }

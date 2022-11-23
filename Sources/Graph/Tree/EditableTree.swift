@@ -20,6 +20,7 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
     mutating func removeNodeUngrouping(_ node: NodeID) throws
     mutating func removeNodeAndChildren(_ node: NodeID) throws
     mutating func moveNode(_ node: NodeID, newParent: NodeID) throws
+    mutating func moveNode(_ node: NodeID, newParent: NodeID, at index: Int) throws
     
     mutating func withSubtree<T>(root: NodeID, transform: (inout Self) throws -> T) throws -> T
 }
@@ -72,9 +73,16 @@ public extension EditableTree {
         
         // Promote children to the removed node's parent
         let newParent = try parent(node)!
-        let children = try nodeSuccessors(node)
-        for child in children {
-            try moveNode(child, newParent: newParent)
+        if isOrdered {
+            let parentIndex = try index(of: node)!
+            for (index, child) in try children(node).enumerated() {
+                try moveNode(child, newParent: newParent, at: index + parentIndex)
+            }
+        } else {
+            let children = try children(node)
+            for child in children {
+                try moveNode(child, newParent: newParent)
+            }
         }
         try graph.removeNode(node)
     }
@@ -103,6 +111,19 @@ public extension EditableTree {
             throw GraphError.notATree
         }
         return try graph.moveEdge(edge, newTail: newParent, newHead: node)
+    }
+    
+    mutating func moveNode(_ node: NodeID, newParent: NodeID, at index: Int) throws {
+        // Can't move root
+        guard node != root else {
+            throw GraphError.notATree
+        }
+        
+        let edge = try inEdge(node)!
+        guard try graph.canMoveDAGEdge(edge, newTail: newParent, newHead: node) else {
+            throw GraphError.notATree
+        }
+        return try graph.moveEdge(edge, newTail: newParent, at: index, newHead: node)
     }
 }
 

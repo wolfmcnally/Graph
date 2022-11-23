@@ -20,8 +20,7 @@ extension TreeType {
         let indent = String(repeating: " ", count: level * 2)
         let label = try! self.nodeData(node)
         result.append(indent + label)
-        let children = try! children(node).sorted(by: { try! nodeData($0) < nodeData($1) } )
-        for child in children {
+        for child in try! children(node) {
             format(level: level + 1, node: child, result: &result)
         }
     }
@@ -50,12 +49,12 @@ final class TreeEditingDistanceTest: XCTestCase {
         XCTAssertEqual(b.keyRoots, [1, 4, 5])
     }
     
-    func testPaperTree() {
+    func testPaperTree() throws {
         let (a, b) = simpleTrees()
-        XCTAssertEqual(editingDistance(from: a, to: b).cost, 2)
+        XCTAssertEqual(try editingDistance(from: a, to: b).cost, 2)
     }
     
-    func testRichAPI() {
+    func testRichAPI() throws {
         let a = makeTree(root: "a", edges: [])
         let b = makeTree(root: "b", edges: [])
         let insertCost: (NodeData) -> Double = { _ in 1 }
@@ -64,28 +63,28 @@ final class TreeEditingDistanceTest: XCTestCase {
         let largeUpdateCost: (NodeData, NodeData) -> Double = { _, _ in 3 }
         let noInsertCost: (NodeData) -> Double = { _ in 0 }
         // prefer update
-        XCTAssertEqual(editingDistance(from: a, to: b, insertCost: insertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost, 1)
+        XCTAssertEqual(try editingDistance(from: a, to: b, insertCost: insertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost, 1)
         // prefer insert/remove
-        XCTAssertEqual(editingDistance(from: a, to: b, insertCost: insertCost, removeCost: removeCost, updateCost: largeUpdateCost).cost, 2)
+        XCTAssertEqual(try editingDistance(from: a, to: b, insertCost: insertCost, removeCost: removeCost, updateCost: largeUpdateCost).cost, 2)
         
         let c = makeTree(root: "a", edges: [("a", "x")])
-        let dist1 = editingDistance(from: a, to: c, insertCost: insertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost
-        let dist2 = editingDistance(from: a, to: c, insertCost: noInsertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost
+        let dist1 = try editingDistance(from: a, to: c, insertCost: insertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost
+        let dist2 = try editingDistance(from: a, to: c, insertCost: noInsertCost, removeCost: removeCost, updateCost: smallUpdateCost).cost
         XCTAssert(dist1 > dist2)
     }
     
-    func testDistance() {
+    func testDistance() throws {
         let trees = [tree1, tree2, tree3, tree4]
         for(a, b) in product(trees, trees) {
-            let ab = editingDistance(from: a, to: b).cost
-            let ba = editingDistance(from: b, to: a).cost
+            let ab = try editingDistance(from: a, to: b).cost
+            let ba = try editingDistance(from: b, to: a).cost
             XCTAssertEqual(ab, ba)
         }
         
         for((a, b), c) in product(product(trees, trees), trees) {
-            let ab = editingDistance(from: a, to: b).cost
-            let bc = editingDistance(from: b, to: c).cost
-            let ac = editingDistance(from: a, to: c).cost
+            let ab = try editingDistance(from: a, to: b).cost
+            let bc = try editingDistance(from: b, to: c).cost
+            let ac = try editingDistance(from: a, to: c).cost
             XCTAssertTrue(ac <= ab + bc)
         }
     }
@@ -95,39 +94,39 @@ final class TreeEditingDistanceTest: XCTestCase {
 //        print(t.jsonString(outputFormatting: [.prettyPrinted, .sortedKeys]))
 //    }
     
-    func testSymmetry() {
+    func testSymmetry() throws {
         let trees = (0..<3).map { _ in randTree(depth: 5, labelLen: 3, width: 2) }
         for(a, b) in product(trees, trees) {
-            let ab = editingDistance(from: a, to: b).cost
-            let ba = editingDistance(from: b, to: a).cost
+            let ab = try editingDistance(from: a, to: b).cost
+            let ba = try editingDistance(from: b, to: a).cost
 //            print(ab, ba)
             XCTAssertEqual(ab, ba)
         }
     }
     
-    func testNondegeneracy() {
+    func testNondegeneracy() throws {
         let trees = (0..<3).map { _ in randTree(depth: 5, labelLen: 3, width: 2) }
         for(a, b) in product(trees, trees) {
-            let d = editingDistance(from: a, to: b).cost
+            let d = try editingDistance(from: a, to: b).cost
 //            print(d, a == b)
             XCTAssertTrue(d == 0 ? a == b : a != b)
         }
     }
     
-    func testTriangleInequality() {
+    func testTriangleInequality() throws {
         let trees1 = (0..<3).map { _ in randTree(depth: 5, labelLen: 3, width: 2) }
         let trees2 = (0..<3).map { _ in randTree(depth: 5, labelLen: 3, width: 2) }
         let trees3 = (0..<3).map { _ in randTree(depth: 5, labelLen: 3, width: 2) }
         for((a, b), c) in product(product(trees1, trees2), trees3) {
-            let ab = editingDistance(from: a, to: b).cost
-            let bc = editingDistance(from: b, to: c).cost
-            let ac = editingDistance(from: a, to: c).cost
+            let ab = try editingDistance(from: a, to: b).cost
+            let bc = try editingDistance(from: b, to: c).cost
+            let ac = try editingDistance(from: a, to: c).cost
 //            print(ab, bc, ac)
             XCTAssertTrue(ac < ab + bc)
         }
     }
     
-    func testLabelChange() {
+    func testLabelChange() throws {
         for a in (0..<12).lazy.map({ _ in randTree(depth: 5, labelLen: 3, width: 2) }) {
             var b = a
             let node = b.nodes.randomElement()!
@@ -136,22 +135,22 @@ final class TreeEditingDistanceTest: XCTestCase {
             try! b.withNodeData(node) { label in
                 label = newLabel
             }
-            let dist = editingDistance(from: a, to: b).cost
+            let dist = try editingDistance(from: a, to: b).cost
             let expectedDist: Double = oldLabel == newLabel ? 0 : 1
             XCTAssertEqual(dist, expectedDist)
         }
     }
     
-    func testEmpty() {
+    func testEmpty() throws {
         let t1 = makeTree(root: "", edges: [])
         let t2 = makeTree(root: "a", edges: [])
         let t3 = makeTree(root: "b", edges: [])
-        XCTAssertEqual(editingDistance(from: t1, to: t1).cost, 0)
-        XCTAssertEqual(editingDistance(from: t2, to: t1).cost, 1)
-        XCTAssertEqual(editingDistance(from: t1, to: t3).cost, 1)
+        XCTAssertEqual(try editingDistance(from: t1, to: t1).cost, 0)
+        XCTAssertEqual(try editingDistance(from: t2, to: t1).cost, 1)
+        XCTAssertEqual(try editingDistance(from: t1, to: t3).cost, 1)
     }
     
-    func testSimpleLabelChange() {
+    func testSimpleLabelChange() throws {
         let a = makeTree(root: "f", edges: [
             ("f", "a"),
                 ("a", "h"),
@@ -167,10 +166,10 @@ final class TreeEditingDistanceTest: XCTestCase {
                     ("r", "b"),
             ("f", "e"),
         ])
-        XCTAssertEqual(editingDistance(from: a, to: b).cost, 3)
+        XCTAssertEqual(try editingDistance(from: a, to: b).cost, 3)
     }
     
-    func testIncorrectBehaviorRegression() {
+    func testIncorrectBehaviorRegression() throws {
         let a = makeTree(root: "a", edges: [
             ("a", "b"),
                 ("b", "x"),
@@ -182,19 +181,19 @@ final class TreeEditingDistanceTest: XCTestCase {
             ("a", "b"),
                 ("b", "y"),
         ])
-        XCTAssertEqual(editingDistance(from: a, to: b).cost, 2)
+        XCTAssertEqual(try editingDistance(from: a, to: b).cost, 2)
     }
     
-    func testWrongRemoval() {
+    func testWrongRemoval() throws {
         let a = makeTree(root: "a", edges: [
             ("a", "b"),
             ("a", "c"),
         ])
         let b = makeTree(root: "a", edges: [])
-        XCTAssertEqual(editingDistance(from: a, to: b).cost, 2)
+        XCTAssertEqual(try editingDistance(from: a, to: b).cost, 2)
     }
     
-    func testInsertAtRoot() {
+    func testInsertAtRoot() throws {
         let a = makeTree(root: "a", edges: [
             ("a", "b"),
             ("a", "c"),
@@ -206,59 +205,59 @@ final class TreeEditingDistanceTest: XCTestCase {
                 ("a", "c"),
         ])
         print(
-            editingDistance(from: a, to: b).ops
+            try editingDistance(from: a, to: b).ops
                 .map({ $0.description })
                 .joined(separator: "\n")
         )
     }
     
-//    func testOpsAB() throws {
-//        func run(_ a: TreeType, _ b: TreeType, _ expectedOps: String? = nil) throws {
-//            let ops = editingDistance(from: a, to: b).ops
-//
-//            let opsString = ops.map({ $0.description }).joined(separator: "\n")
-//
-//            if let expectedOps {
-//                XCTAssertEqual(opsString, expectedOps)
-//            } else {
-//                print(a.format, terminator: "\n\n")
-//                print(b.format, terminator: "\n\n")
-//                print(opsString, terminator: "\n\n")
-//            }
-//
-//            var _nextNodeID = a.nodes.max()! + 1
-//            var _nextEdgeID = a.edges.max()! + 1
-//
-//            func nextNodeID() -> NodeID {
-//                defer { _nextNodeID += 1}
-//                return _nextNodeID
-//            }
-//
-//            func nextEdgeID() -> EdgeID {
-//                defer { _nextEdgeID += 1 }
-//                return _nextEdgeID
-//            }
-//
-//            let c = try a.applyEditingOperations(ops, nextNodeID: nextNodeID, nextEdgeID: nextEdgeID, makeEdgeData: ({ Empty() })) { op, t in
-//                print(op)
-//                print(t.format, terminator: "\n\n")
-//            }
-//            if expectedOps == nil {
-//                print(c.format)
-//            }
-//            XCTAssertEqual(c.format, b.format)
-//        }
+    func testOpsAB() throws {
+        func run(_ a: TreeType, _ b: TreeType, _ expectedOps: String? = nil) throws {
+            let ops = try editingDistance(from: a, to: b).ops
+
+            let opsString = ops.map({ $0.description }).joined(separator: "\n")
+
+            if let expectedOps {
+                XCTAssertEqual(opsString, expectedOps)
+            } else {
+                print(a.format, terminator: "\n\n")
+                print(b.format, terminator: "\n\n")
+                print(opsString, terminator: "\n\n")
+            }
+
+            var _nextNodeID = a.nodes.max()! + 1
+            var _nextEdgeID = a.edges.max()! + 1
+
+            func nextNodeID() -> NodeID {
+                defer { _nextNodeID += 1}
+                return _nextNodeID
+            }
+
+            func nextEdgeID() -> EdgeID {
+                defer { _nextEdgeID += 1 }
+                return _nextEdgeID
+            }
+
+            let c = try a.applyEditingOperations(ops, nextNodeID: nextNodeID, nextEdgeID: nextEdgeID, makeEdgeData: ({ Empty() })) { op, t in
+                print(op)
+                print(t.format, terminator: "\n\n")
+            }
+            if expectedOps == nil {
+                print(c.format)
+            }
+            XCTAssertEqual(c.format, b.format)
+        }
         
 //        try run(treeA, treeB)
-        
+//        
 //        try run(treeA, treeB,
 //        """
 //        (remove, 3, c)
 //        (insert, 1, c)
 //        """)
         
-//        try run(treeA, treeC)
-//    }
+        try run(treeA, treeC)
+    }
 }
 
 fileprivate var tree1: TreeType = {
@@ -389,7 +388,7 @@ fileprivate func makeTree(root: String, edges: [(String, String)]) -> TreeType {
 }
 
 fileprivate func makeTree(root: String, edges: [(String, String)], gen: inout IDGen) -> TreeType {
-    var graph = GraphType()
+    var graph = GraphType(isOrdered: true)
     let rootID = gen.nextNode
     try! graph.newNode(rootID, data: root)
     var idsByLabel: [String: Int] = [root: rootID]

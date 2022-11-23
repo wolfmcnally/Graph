@@ -54,7 +54,7 @@ extension Graph: Codable where NodeID: Codable, EdgeID: Codable, NodeData: Codab
         init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             let data = try container.decode(NodeData.self)
-            self.node = Node(data: data)
+            self.node = Node(data: data, isOrdered: false)
         }
     }
 

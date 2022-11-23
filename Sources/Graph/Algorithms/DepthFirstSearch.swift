@@ -49,7 +49,8 @@ public extension ViewableGraph {
                 .filter {
                     $0 != excludedEdge
                 }
-            var stack: [(NodeID, EdgeID?, SortedSet<EdgeID>)] = []
+                .array
+            var stack: [(NodeID, EdgeID?, [EdgeID])] = []
             stack.append((root, nil, outEdges))
             while let (tail, finishedEdge, remainingOutEdges) = stack.popLast() {
                 var tail = tail
@@ -77,7 +78,7 @@ public extension ViewableGraph {
                         if let result = try visitor.discoverNode(tail) {
                             return result
                         }
-                        remainingOutEdges = try nodeOutEdges(tail)
+                        remainingOutEdges = try nodeOutEdges(tail).array
                     case .discovered:
                         if let result = try visitor.backEdge(edge) {
                             return result

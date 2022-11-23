@@ -7,18 +7,25 @@ where NodeID: ElementID, EdgeID: ElementID
     var _nodes: SortedDictionary<NodeID, Node> = [:]
     var _edges: SortedDictionary<EdgeID, Edge> = [:]
     public var data: GraphData
-    
-    public init(data: GraphData) {
+    public let isOrdered: Bool
+
+    public init(data: GraphData, isOrdered: Bool = false) {
         self.data = data
+        self.isOrdered = isOrdered
     }
 
     struct Node {
         var inEdges: SortedSet<EdgeID> = []
-        var outEdges: SortedSet<EdgeID> = []
+        var outEdges: any EdgeSet<EdgeID>
         var data: NodeData
         
-        init(data: NodeData) {
+        init(data: NodeData, isOrdered: Bool) {
             self.data = data
+            if isOrdered {
+                outEdges = OrderedEdgeSet<EdgeID>()
+            } else {
+                outEdges = SortedEdgeSet<EdgeID>()
+            }
         }
     }
     
@@ -30,11 +37,11 @@ where NodeID: ElementID, EdgeID: ElementID
 }
 
 extension Graph where GraphData == Void {
-    public init() { self.init(data: ()) }
+    public init(isOrdered: Bool = false) { self.init(data: (), isOrdered: isOrdered) }
 }
 
 extension Graph where GraphData: DefaultConstructable {
-    public init() { self.init(data: GraphData()) }
+    public init(isOrdered: Bool = false) { self.init(data: GraphData(), isOrdered: isOrdered) }
 }
 
 // MARK: - ViewableGraph Implementations
@@ -51,21 +58,26 @@ extension Graph {
     public func hasNoEdge(_ edge: EdgeID) -> Bool { !hasEdge(edge) }
     public func nodeData(_ node: NodeID) throws -> NodeData { try getNode(node).data }
     public func edgeData(_ edge: EdgeID) throws -> EdgeData { try getEdge(edge).data }
-    public func nodeOutEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try getNode(node).outEdges }
+    public func nodeOutEdges(_ node: NodeID) throws -> any EdgeSet<EdgeID> { try getNode(node).outEdges }
     public func nodeInEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try getNode(node).inEdges }
     public func nodeEdges(_ node: NodeID) throws -> SortedSet<EdgeID> { try nodeOutEdges(node).union(nodeInEdges(node)) }
-    public func nodeSuccessors(_ node: NodeID) throws -> SortedSet<NodeID> { try SortedSet(nodeOutEdges(node).map(edgeHead)) }
-    public func nodePredecessors(_ node: NodeID) throws -> SortedSet<NodeID> { try SortedSet(nodeInEdges(node).map(edgeTail)) }
+    public func nodeSuccessors(_ node: NodeID) throws -> [NodeID] { try nodeOutEdges(node).map(edgeHead) }
+    public func nodePredecessors(_ node: NodeID) throws -> [NodeID] { try nodeInEdges(node).map(edgeTail) }
     
     public func nodeNeighbors(_ node: NodeID) throws -> SortedSet<NodeID> {
         let successors = try nodeSuccessors(node)
         let predececessors = try nodePredecessors(node)
-        return successors.union(predececessors)
+        return SortedSet(successors).union(SortedSet(predececessors))
     }
     
+    public func countSuccessors(_ node: NodeID) throws -> Int { try nodeOutEdges(node).count }
+    public func countPredecessors(_ node: NodeID) throws -> Int { try nodeInEdges(node).count }
+    public func countNeighbors(_ node: NodeID) throws -> Int { try countSuccessors(node) + countPredecessors(node) }
+
     public func hasSuccessors(_ node: NodeID) throws -> Bool { try !nodeOutEdges(node).isEmpty }
     public func hasPredecessors(_ node: NodeID) throws -> Bool { try !nodeInEdges(node).isEmpty }
     public func hasNeighbors(_ node: NodeID) throws -> Bool { try hasSuccessors(node) || hasPredecessors(node) }
+    
     public func edgeHead(_ edge: EdgeID) throws -> NodeID { try getEdge(edge).head }
     public func edgeTail(_ edge: EdgeID) throws -> NodeID { try getEdge(edge).tail }
     
@@ -73,40 +85,44 @@ extension Graph {
         let e = try getEdge(edge)
         return (e.tail, e.head)
     }
+    
+    public func edgeIndex(_ edge: EdgeID) throws -> Int {
+        try getNode(edgeTail(edge)).outEdges.index(of: edge)
+    }
 }
 
 // MARK: - EditableGraph Implementations
 
-extension Graph {
+public extension Graph {
     @discardableResult
-    public mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T {
+    mutating func withNodeData<T>(_ node: NodeID, transform: (inout NodeData) throws -> T) throws -> T {
         try checkHasNode(node)
         return try transform(&_nodes[node]!.data)
     }
 
     @discardableResult
-    public mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
+    mutating func withEdgeData<T>(_ edge: EdgeID, transform: (inout EdgeData) throws -> T) throws -> T {
         try checkHasEdge(edge)
         return try transform(&_edges[edge]!.data)
     }
 
-    public mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
+    mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws {
         try withEdgeData(edge) {
             $0 = data
         }
     }
     
-    public mutating func newNode(_ node: NodeID, data: NodeData) throws {
+    mutating func newNode(_ node: NodeID, data: NodeData) throws {
         try checkHasNoNode(node)
-        _nodes[node] = Node(data: data)
+        _nodes[node] = Node(data: data, isOrdered: isOrdered)
     }
 
-    public mutating func removeNode(_ node: NodeID) throws {
+    mutating func removeNode(_ node: NodeID) throws {
         try removeNodeEdges(node)
         _ = _nodes.removeValue(forKey: node)
     }
 
-    public mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, head: NodeID, data: EdgeData) throws {
         try checkHasNoEdge(edge)
         try checkHasNode(tail)
         try checkHasNode(head)
@@ -116,21 +132,31 @@ extension Graph {
         _nodes[head]!.inEdges.insert(edge)
     }
 
-    public mutating func removeEdge(_ edge: EdgeID) throws {
+    mutating func newEdge(_ edge: EdgeID, tail: NodeID, at index: Int, head: NodeID, data: EdgeData) throws {
+        try checkHasNoEdge(edge)
+        try checkHasNode(tail)
+        try checkHasNode(head)
+        
+        _edges[edge] = Edge(tail: tail, head: head, data: data)
+        try _nodes[tail]!.outEdges.insert(edge, at: index)
+        _nodes[head]!.inEdges.insert(edge)
+    }
+
+    mutating func removeEdge(_ edge: EdgeID) throws {
         let e = try getEdge(edge)
         _nodes[e.tail]!.outEdges.remove(edge)
         _nodes[e.head]!.inEdges.remove(edge)
         _ = _edges.removeValue(forKey: edge)
     }
 
-    public mutating func removeNodeEdges(_ node: NodeID) throws {
+    mutating func removeNodeEdges(_ node: NodeID) throws {
         let edges = try nodeEdges(node)
         edges.forEach {
             try! removeEdge($0)
         }
     }
     
-    public mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, newHead: NodeID) throws {
         try checkHasNode(newTail)
         try checkHasNode(newHead)
         var e = try getEdge(edge)
@@ -159,6 +185,56 @@ extension Graph {
                 node.inEdges.remove(edge)
             }
         }
+    }
+    
+    mutating func moveEdge(_ edge: EdgeID, newTail: NodeID, at index: Int, newHead: NodeID) throws {
+        try checkHasNode(newTail)
+        try checkHasNode(newHead)
+        var e = try getEdge(edge)
+        let oldTail = e.tail
+        let oldHead = e.head
+        let oldIndex = try edgeIndex(edge)
+        guard oldTail != newTail || oldHead != newHead || oldIndex != index else {
+            return
+        }
+        e.tail = newTail
+        e.head = newHead
+        _edges[edge] = e
+
+        if oldTail != newTail {
+            try withNode(newTail) { node in
+                try node.outEdges.insert(edge, at: index)
+            }
+            try withNode(oldTail) { node in
+                node.outEdges.remove(edge)
+            }
+        } else if oldIndex != index {
+            try withNode(newTail) { node in
+                node.outEdges.remove(edge)
+                try node.outEdges.insert(edge, at: index)
+            }
+        }
+        if oldHead != newHead {
+            try withNode(newHead) { node in
+                node.inEdges.insert(edge)
+            }
+            try withNode(oldHead) { node in
+                node.inEdges.remove(edge)
+            }
+        }
+    }
+    
+    mutating func moveEdge(_ edge: EdgeID, to index: Int) throws {
+        let (tail, head) = try edgeEnds(edge)
+        try moveEdge(edge, newTail: tail, at: index, newHead: head)
+    }
+    
+    mutating func moveEdgeToFront(_ edge: EdgeID) throws {
+        try moveEdge(edge, to: 0)
+    }
+    
+    mutating func moveEdgeToBack(_ edge: EdgeID) throws {
+        try moveEdge(edge, to: countSuccessors(edgeTail(edge)) - 1)
     }
 }
 
@@ -222,7 +298,7 @@ private extension Graph {
 
 extension Graph.Node: Equatable where Graph.NodeData: Equatable {
     static func == (lhs: Graph.Node, rhs: Graph.Node) -> Bool {
-        lhs.inEdges == rhs.inEdges && lhs.outEdges == rhs.outEdges && lhs.data == rhs.data
+        lhs.inEdges == rhs.inEdges && lhs.outEdges.array == rhs.outEdges.array && lhs.data == rhs.data
     }
 }
 
