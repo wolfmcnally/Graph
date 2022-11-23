@@ -211,53 +211,53 @@ final class TreeEditingDistanceTest: XCTestCase {
         )
     }
     
-    func testOpsAB() throws {
-        func run(_ a: TreeType, _ b: TreeType, _ expectedOps: String? = nil) throws {
-            let ops = try editingDistance(from: a, to: b).ops
-
-            let opsString = ops.map({ $0.description }).joined(separator: "\n")
-
-            if let expectedOps {
-                XCTAssertEqual(opsString, expectedOps)
-            } else {
-                print(a.format, terminator: "\n\n")
-                print(b.format, terminator: "\n\n")
-                print(opsString, terminator: "\n\n")
-            }
-
-            var _nextNodeID = a.nodes.max()! + 1
-            var _nextEdgeID = a.edges.max()! + 1
-
-            func nextNodeID() -> NodeID {
-                defer { _nextNodeID += 1}
-                return _nextNodeID
-            }
-
-            func nextEdgeID() -> EdgeID {
-                defer { _nextEdgeID += 1 }
-                return _nextEdgeID
-            }
-
-            let c = try a.applyEditingOperations(ops, nextNodeID: nextNodeID, nextEdgeID: nextEdgeID, makeEdgeData: ({ Empty() })) { op, t in
-                print(op)
-                print(t.format, terminator: "\n\n")
-            }
-            if expectedOps == nil {
-                print(c.format)
-            }
-            XCTAssertEqual(c.format, b.format)
-        }
-        
-//        try run(treeA, treeB)
+//    func testOpsAB() throws {
+//        func run(_ a: TreeType, _ b: TreeType, _ expectedOps: String? = nil) throws {
+//            let ops = try editingDistance(from: a, to: b).ops
+//
+//            let opsString = ops.map({ $0.description }).joined(separator: "\n")
+//
+//            if let expectedOps {
+//                XCTAssertEqual(opsString, expectedOps)
+//            } else {
+//                print(a.format, terminator: "\n\n")
+//                print(b.format, terminator: "\n\n")
+//                print(opsString, terminator: "\n\n")
+//            }
+//
+//            var _nextNodeID = a.nodes.max()! + 1
+//            var _nextEdgeID = a.edges.max()! + 1
+//
+//            func nextNodeID() -> NodeID {
+//                defer { _nextNodeID += 1}
+//                return _nextNodeID
+//            }
+//
+//            func nextEdgeID() -> EdgeID {
+//                defer { _nextEdgeID += 1 }
+//                return _nextEdgeID
+//            }
+//
+//            let c = try a.applyEditingOperations(ops, nextNodeID: nextNodeID, nextEdgeID: nextEdgeID, makeEdgeData: ({ Empty() })) { op, t in
+//                print(op)
+//                print(t.format, terminator: "\n\n")
+//            }
+//            if expectedOps == nil {
+//                print(c.format)
+//            }
+//            XCTAssertEqual(c.format, b.format)
+//        }
 //        
-//        try run(treeA, treeB,
-//        """
-//        (remove, 3, c)
-//        (insert, 1, c)
-//        """)
-        
-        try run(treeA, treeC)
-    }
+////        try run(treeA, treeB)
+////        
+////        try run(treeA, treeB,
+////        """
+////        (remove, 3, c)
+////        (insert, 1, c)
+////        """)
+//        
+//        try run(treeA, treeC)
+//    }
 }
 
 fileprivate var tree1: TreeType = {
