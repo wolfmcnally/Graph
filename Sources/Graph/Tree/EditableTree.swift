@@ -17,6 +17,7 @@ where NodeID == InnerGraph.NodeID, EdgeID == InnerGraph.EdgeID,
     mutating func setEdgeData(_ edge: EdgeID, data: EdgeData) throws
 
     mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, at index: Int, nodeData: NodeData, edgeData: EdgeData) throws
     mutating func removeNodeUngrouping(_ node: NodeID) throws
     mutating func removeNodeAndChildren(_ node: NodeID) throws
     mutating func moveNode(_ node: NodeID, newParent: NodeID) throws
@@ -53,6 +54,11 @@ public extension EditableTree {
         try graph.newEdge(edge, tail: parent, head: node, data: edgeData)
     }
     
+    mutating func newNode(_ node: NodeID, parent: NodeID, edge: EdgeID, at index: Int, nodeData: NodeData, edgeData: EdgeData) throws {
+        try graph.newNode(node, data: nodeData)
+        try graph.newEdge(edge, tail: parent, at: index, head: node, data: edgeData)
+    }
+
     mutating func insertNode(_ node: NodeID, at existingNode: NodeID, edge: EdgeID, nodeData: NodeData, edgeData: EdgeData) throws {
         if existingNode == root {
             try graph.newNode(node, data: nodeData)
@@ -60,31 +66,42 @@ public extension EditableTree {
             try setRoot(node)
         } else {
             let parent = try parent(existingNode)!
-            try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: edgeData)
+            if isOrdered {
+                let index = try index(of: existingNode)!
+                try newNode(node, parent: parent, edge: edge, at: index, nodeData: nodeData, edgeData: edgeData)
+            } else {
+                try newNode(node, parent: parent, edge: edge, nodeData: nodeData, edgeData: edgeData)
+            }
             try moveNode(existingNode, newParent: node)
         }
     }
 
     mutating func removeNodeUngrouping(_ node: NodeID) throws {
-        // Can't remove root
-        guard node != root else {
-            throw GraphError.notATree
-        }
-        
-        // Promote children to the removed node's parent
-        let newParent = try parent(node)!
-        if isOrdered {
-            let parentIndex = try index(of: node)!
-            for (index, child) in try children(node).enumerated() {
-                try moveNode(child, newParent: newParent, at: index + parentIndex)
-            }
-        } else {
+        // Can only remove root if it has exactly one child
+        if node == root {
             let children = try children(node)
-            for child in children {
-                try moveNode(child, newParent: newParent)
+            guard children.count == 1 else {
+                throw GraphError.notATree
             }
+            let newRoot = children.first!
+            try graph.removeNode(node)
+            try setRoot(newRoot)
+        } else {
+            // Promote children to the removed node's parent
+            let newParent = try parent(node)!
+            if isOrdered {
+                let parentIndex = try index(of: node)!
+                for (index, child) in try children(node).enumerated() {
+                    try moveNode(child, newParent: newParent, at: index + parentIndex)
+                }
+            } else {
+                let children = try children(node)
+                for child in children {
+                    try moveNode(child, newParent: newParent)
+                }
+            }
+            try graph.removeNode(node)
         }
-        try graph.removeNode(node)
     }
     
     mutating func removeNodeAndChildren(_ node: NodeID) throws {

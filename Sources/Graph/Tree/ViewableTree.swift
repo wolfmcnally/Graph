@@ -35,6 +35,10 @@ public extension ViewableTree {
         try hasSuccessors(node)
     }
     
+    func countChildren(_ node: NodeID) throws -> Int {
+        try countSuccessors(node)
+    }
+    
     func index(of node: NodeID) throws -> Int? {
         guard let edge = try inEdge(node) else {
             return nil
