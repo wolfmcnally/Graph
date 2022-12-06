@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "fuid",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/wolfmcnally/FUID.git",
+      "state" : {
+        "revision" : "2719608eadb18ca2039a0fc538325511a99ce17b",
+        "version" : "0.2.0"
+      }
+    },
+    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms.git",
@@ -14,7 +23,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections",
       "state" : {
+        "branch" : "main",
         "revision" : "ceab2a560af75361d0f6ca01a15ad58174daf77e"
+      }
+    },
+    {
+      "identity" : "swift-numberkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/objecthub/swift-numberkit.git",
+      "state" : {
+        "revision" : "e8c1cb9e8220001a7efa857fea88c0bd762c56ea",
+        "version" : "2.4.1"
       }
     },
     {
