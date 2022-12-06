@@ -12,8 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "4.0.0")),
-        .package(url: "https://github.com/wolfmcnally/FUID.git", .upToNextMajor(from: "0.1.0")),
-        .package(url: "https://github.com/apple/swift-collections", branch: "main"),
+        .package(url: "https://github.com/apple/swift-collections", revision: "ceab2a560af75361d0f6ca01a15ad58174daf77e"),
         .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
@@ -27,7 +26,6 @@ let package = Package(
             name: "GraphTests",
             dependencies: [
                 "Graph",
-                "FUID",
                 .product(name: "Algorithms", package: "swift-algorithms"),
             ]),
     ]
