@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -10,10 +10,10 @@ let package = Package(
             targets: ["Graph"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "6.0.0")),
-        .package(url: "https://github.com/wolfmcnally/FUID.git", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/wolfmcnally/swift-collections", .upToNextMajor(from: "1.1.0")),
-        .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
+        .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "7.0.0")),
+        .package(url: "https://github.com/wolfmcnally/FUID.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/wolfmcnally/swift-collections.git", .upToNextMajor(from: "1.1.4")),
+        .package(url: "https://github.com/apple/swift-algorithms.git", .upToNextMajor(from: "1.2.0")),
     ],
     targets: [
         .target(
