@@ -12,14 +12,16 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/wolfmcnally/WolfBase.git", .upToNextMajor(from: "7.0.0")),
         .package(url: "https://github.com/wolfmcnally/FUID.git", .upToNextMajor(from: "2.0.0")),
-        .package(url: "https://github.com/wolfmcnally/swift-collections.git", .upToNextMajor(from: "1.1.4")),
+        .package(url: "https://github.com/wolfmcnally/SwiftSortedCollections.git", .upToNextMajor(from: "0.1.0")),
         .package(url: "https://github.com/apple/swift-algorithms.git", .upToNextMajor(from: "1.2.0")),
+        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.1.3")),
     ],
     targets: [
         .target(
             name: "Graph",
             dependencies: [
                 "WolfBase",
+                .product(name: "SortedCollections", package: "SwiftSortedCollections"),
                 .product(name: "Collections", package: "swift-collections"),
             ]),
         .testTarget(
